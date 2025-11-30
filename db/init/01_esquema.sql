@@ -29,10 +29,6 @@ CREATE TABLE usuario (
     )
 );
 
-INSERT INTO usuario (cpf, nome, telefone, email, senha, papel)
-VALUES ('00000000000', 'Usuário Administrador', NULL, 'admin@sistema.com', '123456789', 'municipe')
-ON CONFLICT (cpf) DO NOTHING;
-
 -- MUNÍCIPE (subtipo de usuario)
 CREATE TABLE municipe (
     cpf VARCHAR(14) PRIMARY KEY REFERENCES usuario(cpf)
@@ -48,7 +44,8 @@ CREATE TABLE responsavel_tecnico (
 
 -- EMPRESA TERCEIRIZADA
 CREATE TABLE empresa_terceirizada (
-    cnpj VARCHAR(20) PRIMARY KEY
+    cnpj VARCHAR(20) PRIMARY KEY,
+    nome TEXT NOT NULL
 );
 
 -- solicitacao
@@ -92,7 +89,8 @@ CREATE TABLE arvore (
     tipo TEXT,
     altura NUMERIC,
     dap NUMERIC,
-    UNIQUE (latitude, longitude, contador)
+    UNIQUE (latitude, longitude, contador),
+    CONSTRAINT ck_arvore_tipo CHECK (tipo IN ('público', 'privado'))
 );
 
 
@@ -120,7 +118,8 @@ CREATE TABLE vistoria_inicial (
     contador INTEGER NOT NULL,
     PRIMARY KEY (cod_solicitacao),
     FOREIGN KEY (latitude, longitude, contador)
-        REFERENCES arvore(latitude, longitude, contador)
+        REFERENCES arvore(latitude, longitude, contador),
+    CONSTRAINT ck_vistoria_status CHECK (status IN ('inválida', 'ok'))
 );
 
 -- manutencao
@@ -157,6 +156,3 @@ CREATE TABLE compensacao_ambiental (
         REFERENCES manutencao(cod_solicitacao, tipo),
     CONSTRAINT check_status_ambiental CHECK (status IN ('em aberto', 'finalizada'))
 );
-
-INSERT INTO nome_cientifico (nome_cientifico, nome_popular, nativa) 
-VALUES ('A', 'Pau-Brasil', TRUE);
