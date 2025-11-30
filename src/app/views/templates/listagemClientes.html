@@ -1,0 +1,184 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+  <title>Listagem das Árvores - Green Check</title>
+
+  <!-- Bootstrap -->
+  <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.1.3/css/bootstrap.min.css">
+
+  <!-- Font Awesome para ícones -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+
+  <style>
+    body {
+      background-color: #E8F5E4;
+      /* verde pastel */
+      font-family: Arial, Verdana, sans-serif;
+      padding-top: 90px;
+      /* espaço para navbar fixa */
+    }
+
+    h1 {
+      color: #3f6c45;
+      text-align: center;
+      margin-bottom: 40px;
+      font-weight: 600;
+    }
+
+    /* Navbar verde pastel */
+    .navbar {
+      background-color: #A8D5A2 !important;
+      border-bottom: 2px solid #8BCF8A;
+    }
+
+    .navbar-brand,
+    .nav-link {
+      color: #2d4b31 !important;
+      font-weight: bold;
+    }
+
+    .nav-link:hover {
+      color: #1f351f !important;
+    }
+
+    /* Tabela estilizada */
+    table {
+      background-color: #F4FBF2;
+      border-radius: 10px;
+      overflow: hidden;
+    }
+
+    thead {
+      background-color: #8BCF8A;
+      color: #ffffff;
+    }
+
+    tbody tr:hover {
+      background-color: #e0f3dc;
+    }
+
+    td,
+    th {
+      text-align: center;
+      vertical-align: middle !important;
+    }
+
+    a {
+      color: #2f6c45;
+      font-weight: bold;
+    }
+
+    a:hover {
+      text-decoration: underline;
+    }
+
+    .fa-edit {
+      color: #2e7d32;
+    }
+
+    .fa-trash {
+      color: #c62828;
+    }
+  </style>
+</head>
+
+<body>
+
+  <!-- NAVBAR -->
+  <nav class="navbar navbar-expand-lg navbar-light fixed-top">
+    <a class="navbar-brand" href="#">Green Check 🌿</a>
+
+    <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarNav">
+      <span class="navbar-toggler-icon"></span>
+    </button>
+
+    <div class="collapse navbar-collapse justify-content-end" id="navbarNav">
+      <ul class="navbar-nav">
+        {% if session.usuario_logado %}
+        <li class="nav-item">
+          <a class="nav-link" href="/clientes">Listagem Árvores</a>
+        </li>
+
+        <li class="nav-item">
+          <a class="nav-link" href="/inclusaoClientes">Inclusão Clientes</a>
+        </li>
+
+        <li class="nav-item">
+          <a class="nav-link" href="/consulta">Consulta</a>
+        </li>
+
+        <li class="nav-item">
+          <a class="nav-link text-danger" href="/logout">Sair</a>
+        </li>
+        {% endif %}
+        {% if not session.usuario_logado %}
+        <li class="nav-item">
+          <a class="nav-link" href="/">Acesso</a>
+        </li>
+        {% endif %}
+      </ul>
+    </div>
+  </nav>
+
+
+  <!-- TÍTULO -->
+  <h1>Listagem das árvores cadastradas</h1>
+
+
+  <!-- TABELA -->
+  <div class="container">
+    <table class="table table-bordered table-hover">
+      <thead>
+        <tr>
+          <th>ID</th>
+          <th>Latitude</th>
+          <th>Longitude</th>
+          <th>Status</th>
+          <th>Tipo</th>
+          <th>Nome Científico</th>
+          <th>Altura (m)</th>
+          <th>DAP (cm)</th>
+          <th>Última Vistoria</th>
+          <th>Remover</th>
+        </tr>
+      </thead>
+
+      <tbody>
+        {% for arvore in clientes %}
+        <tr>
+          <td>{{ arvore.id }}</td>
+          <td>{{ arvore.latitude }}</td>
+          <td>{{ arvore.longitude }}</td>
+          <td style="font-weight: bold;
+            {% if arvore.status == 'Saudável' %}color:green;
+            {% elif arvore.status == 'Doente' %}color:orange;
+            {% elif arvore.status == 'Em Risco' %}color:red;
+            {% elif arvore.status == 'Cortada' %}color:gray;
+            {% endif %}">
+            {{ arvore.status }}
+          </td>
+          <td>{{ arvore.tipo }}</td>
+          <td>{{ arvore.nome_cientifico or '-' }}</td>
+          <td>{{ arvore.altura }}</td>
+          <td>{{ arvore.dap }}</td>
+          <td>{{ arvore.ultima_vistoria or '-' }}</td>
+
+          <td>
+            <i class="fa-solid fa-trash"></i>
+            <a href="/removeCliente/{{ arvore.id }}">Remover</a>
+          </td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+
+  <!-- SCRIPTS -->
+  <script src="https://code.jquery.com/jquery-3.3.1.slim.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.3/umd/popper.min.js"></script>
+  <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.1.3/js/bootstrap.min.js"></script>
+
+</body>
+
+</html>

@@ -1,0 +1,180 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>Acesso ao Sistema - Green Check</title>
+
+<!-- Bootstrap -->
+<link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.1.3/css/bootstrap.min.css">
+
+<!-- Font Awesome (iguais às outras telas) -->
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+
+<style>
+    body {
+        background-color: #E8F5E4; /* verde pastel claro */
+        font-family: Arial, Verdana, sans-serif;
+        padding-top: 90px; /* igual às outras telas */
+    }
+
+    h1 {
+        color: #3f6c45;
+        text-align: center;
+        margin-bottom: 40px;
+        font-weight: 600;
+    }
+
+    /* Navbar igual ao arquivo base */
+    .navbar {
+        background-color: #A8D5A2 !important;
+        border-bottom: 2px solid #8BCF8A;
+    }
+
+    .navbar-brand, .nav-link {
+        color: #2d4b31 !important;
+        font-weight: bold;
+    }
+
+    .nav-link:hover {
+        color: #1f351f !important;
+    }
+
+    /* Card do formulário (igual ao estilo das telas de inclusão/edição) */
+    .form-card {
+        max-width: 450px;
+        margin: auto;
+        background: #F4FBF2;
+        padding: 30px 35px;
+        border-radius: 12px;
+        box-shadow: 0px 4px 10px rgba(0,0,0,0.12);
+    }
+
+    label {
+        font-weight: 600;
+        color: #2d4b31;
+    }
+
+    input {
+        border-radius: 6px !important;
+        border: 1px solid #8BCF8A !important;
+        background-color: white !important;
+    }
+
+    input:focus {
+        border-color: #5cbf60 !important;
+        box-shadow: 0 0 4px rgba(92, 191, 96, 0.5) !important;
+    }
+
+    .btn-success {
+        background-color: #8BCF8A;
+        border-color: #76b976;
+        font-weight: bold;
+        padding: 10px;
+        border-radius: 8px;
+        width: 100%;
+    }
+
+    .btn-success:hover {
+        background-color: #75c576;
+        border-color: #5ea95e;
+    }
+
+</style>
+</head>
+
+<body>
+
+<!-- NAVBAR -->
+<nav class="navbar navbar-expand-lg navbar-light fixed-top">
+  <a class="navbar-brand" href="#">Green Check 🌿</a>
+
+  <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarNav">
+    <span class="navbar-toggler-icon"></span>
+  </button>
+
+  <div class="collapse navbar-collapse justify-content-end" id="navbarNav">
+    <ul class="navbar-nav">
+      {% if session.usuario_logado %}
+      <li class="nav-item">
+          <a class="nav-link" href="/clientes">Listagem Árvores</a>
+      </li>
+
+      <li class="nav-item">
+          <a class="nav-link" href="/inclusaoClientes">Inclusão Clientes</a>
+      </li>
+
+      <li class="nav-item">
+          <a class="nav-link" href="/consulta">Consulta</a>
+      </li>
+
+      <li class="nav-item">
+          <a class="nav-link text-danger" href="/logout">Sair</a>
+      </li>
+      {% endif %}
+      {% if not session.usuario_logado %}
+      <li class="nav-item">
+          <a class="nav-link" href="/">Acesso</a>
+      </li>
+      {% endif %}
+    </ul>
+  </div>
+</nav>
+
+
+<!-- TÍTULO -->
+<h1>Acesso ao Sistema</h1>
+
+
+<!-- CARD DO FORMULÁRIO -->
+<div class="form-card">
+
+<form action="/validaBDUsuarios" method="post">
+
+    <input type="hidden" id="id" name="id" />
+
+    <div class="form-group">
+        <label for="login">Login:</label>
+        <input class="form-control" type="text" id="login" name="login">
+    </div>
+
+    <div class="form-group">
+        <label for="senha">Senha:</label>
+        <input class="form-control" type="password" id="senha" name="senha">
+    </div>
+
+    <button type="submit" class="btn btn-success">Validar Acesso</button>
+
+</form>
+
+</div>
+
+
+<!-- SCRIPTS -->
+<script src="https://code.jquery.com/jquery-3.3.1.slim.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.3/umd/popper.min.js"></script>
+<script src="https://stackpath.bootstrapcdn.com/bootstrap/4.1.3/js/bootstrap.min.js"></script>
+
+<script>
+document.querySelector("form").addEventListener("submit", function(event) {
+    const email = document.getElementById("login").value.trim();
+    const senha = document.getElementById("senha").value;
+
+    // Regex simples para validar email
+    const emailValido = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
+
+    if (!emailValido) {
+        event.preventDefault();
+        alert("Por favor, digite um email válido.");
+        return;
+    }
+
+    if (senha.length < 8) {
+        event.preventDefault();
+        alert("A senha deve ter pelo menos 8 caracteres.");
+        return;
+    }
+});
+</script>
+
+
+</body>
+</html>

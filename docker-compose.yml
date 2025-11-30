@@ -1,0 +1,42 @@
+services:
+  db:
+    image: postgres:16
+    container_name: arvore_db
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: arvore_user
+      POSTGRES_PASSWORD: arvore_pass
+      POSTGRES_DB: arvore_urbana
+    ports:
+      - "5555:5432"   # porta externa 5555 -> porta interna 5432
+    volumes:
+      - ./db/data:/var/lib/postgresql/data
+      - ./db/init:/docker-entrypoint-initdb.d
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U arvore_user -d arvore_urbana"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  web:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: green_check_web
+    restart: unless-stopped
+    ports:
+      - "3000:3000"
+    environment:
+      DB_HOST: db
+      DB_PORT: 5432
+      DB_USER: arvore_user
+      DB_PASSWORD: arvore_pass
+      DB_NAME: arvore_urbana
+    depends_on:
+      db:
+        condition: service_healthy
+    volumes:
+      - .:/app
+      - /app/__pycache__
+    command: python server.py
+

@@ -1,0 +1,240 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <title>Inclusão de Árvore - Green Check</title>
+
+    <!-- Bootstrap -->
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.1.3/css/bootstrap.min.css">
+
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+
+    <style>
+        body {
+            background-color: #E8F5E4;
+            /* verde pastel */
+            font-family: Arial, Verdana, sans-serif;
+            padding-top: 90px;
+        }
+
+        h1 {
+            color: #3f6c45;
+            text-align: center;
+            margin-bottom: 40px;
+            font-weight: 600;
+        }
+
+        /* Navbar */
+        .navbar {
+            background-color: #A8D5A2 !important;
+            border-bottom: 2px solid #8BCF8A;
+        }
+
+        .navbar-brand,
+        .nav-link {
+            color: #2d4b31 !important;
+            font-weight: bold;
+        }
+
+        .nav-link:hover {
+            color: #1f351f !important;
+        }
+
+        /* Card */
+        .form-card {
+            max-width: 550px;
+            margin: auto;
+            background: #F4FBF2;
+            padding: 30px 40px;
+            border-radius: 12px;
+            box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.1);
+        }
+
+        label {
+            font-weight: 600;
+            color: #2d4b31;
+        }
+
+        input,
+        select {
+            border-radius: 6px !important;
+            border: 1px solid #8BCF8A !important;
+            background-color: #ffffff !important;
+        }
+
+        input:focus,
+        select:focus {
+            border-color: #5cbf60 !important;
+            box-shadow: 0 0 4px rgba(92, 191, 96, 0.5) !important;
+        }
+
+        .btn-success {
+            background-color: #8BCF8A;
+            border-color: #76b976;
+            font-weight: bold;
+            width: 100%;
+            padding: 10px;
+            border-radius: 8px;
+        }
+
+        .btn-success:hover {
+            background-color: #75c576;
+            border-color: #5ea95e;
+        }
+    </style>
+</head>
+
+<body>
+
+    <!-- NAVBAR -->
+    <nav class="navbar navbar-expand-lg navbar-light fixed-top">
+        <a class="navbar-brand" href="#">Green Check 🌿</a>
+
+        <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarNav">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+
+        <div class="collapse navbar-collapse justify-content-end" id="navbarNav">
+            <ul class="navbar-nav">
+                {% if session.usuario_logado %}
+                <li class="nav-item">
+                    <a class="nav-link" href="/clientes">Listagem Árvores</a>
+                </li>
+
+                <li class="nav-item">
+                    <a class="nav-link" href="/inclusaoClientes">Inclusão Clientes</a>
+                </li>
+
+                <li class="nav-item">
+                    <a class="nav-link" href="/consulta">Consulta</a>
+                </li>
+
+                <li class="nav-item">
+                    <a class="nav-link text-danger" href="/logout">Sair</a>
+                </li>
+                {% endif %}
+                {% if not session.usuario_logado %}
+                <li class="nav-item">
+                    <a class="nav-link" href="/">Acesso</a>
+                </li>
+                {% endif %}
+            </ul>
+        </div>
+    </nav>
+
+
+    <!-- TÍTULO -->
+    <h1> Cadastro de uma árvore</h1>
+
+    {% with messages = get_flashed_messages(with_categories=true) %}
+    {% if messages %}
+    <div class="container mt-3">
+        {% for category, message in messages %}
+        <div class="alert alert-{{ category }} alert-dismissible fade show" role="alert">
+            {{ message }}
+            <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+                <span aria-hidden="true">&times;</span>
+            </button>
+        </div>
+        {% endfor %}
+    </div>
+    {% endif %}
+    {% endwith %}
+
+    <!-- FORMULÁRIO -->
+    <div class="form-card">
+
+        <form action="/insertBDClientes" method="post">
+
+            <input type="hidden" id="id" name="id" />
+
+            <div class="form-group">
+                <label for="latitude">Latitude:</label>
+                <input type="text" class="form-control" id="latitude" name="latitude">
+            </div>
+
+            <div class="form-group">
+                <label for="longitude">Longitude:</label>
+                <input type="text" class="form-control" id="longitude" name="longitude">
+            </div>
+
+            <div class="form-group">
+                <label for="status">Status:</label>
+                <select id="status" name="status" class="form-control">
+                    <option value="Saudável">Saudável</option>
+                    <option value="Doente">Doente</option>
+                    <option value="Em Risco">Em Risco</option>
+                    <option value="Corte Programado">Corte Programado</option>
+                    <option value="Cortada">Cortada</option>
+                </select>
+            </div>
+
+            <div class="form-group">
+                <label for="tipo">Tipo:</label>
+                <select id="tipo" name="tipo" class="form-control">
+                    <option value="Pública">Pública</option>
+                    <option value="Privada">Privada</option>
+                </select>
+            </div>
+
+            <div class="form-group">
+                <label for="altura_m">Altura (m):</label>
+                <input type="text" class="form-control" id="altura_m" name="altura_m">
+            </div>
+
+            <div class="form-group">
+                <label for="dap_cm">DAP (cm):</label>
+                <input type="text" class="form-control" id="dap_cm" name="dap_cm">
+            </div>
+
+            <!-- NOVO CAMPO: NOME CIENTÍFICO -->
+            <div class="form-group">
+                <label for="nome_cientifico">Nome Científico:</label>
+                <input type="text" class="form-control" id="nome_cientifico" name="nome_cientifico">
+            </div>
+
+            <!-- CAMPO: POSSUI TAG? -->
+            <div class="form-group">
+                <label><strong>Possui TAG?</strong></label><br>
+                <input type="checkbox" id="tem_tag" name="tem_tag">
+                <label for="tem_tag">Sim</label>
+            </div>
+
+            <!-- CAMPO: CÓDIGO DA TAG -->
+            <div class="form-group" id="campo_tag" style="display: none;">
+                <label for="codigo_tag">Código da TAG:</label>
+                <input type="text" class="form-control" id="codigo_tag" name="codigo_tag">
+            </div>
+
+            <div class="form-group">
+                <label for="data_ultima_vistoria">Data da última vistoria:</label>
+                <input type="date" class="form-control" id="data_ultima_vistoria" name="data_ultima_vistoria">
+            </div>
+
+            <button type="submit" class="btn btn-success">Inserir Dados</button>
+
+        </form>
+    </div>
+
+
+    <!-- SCRIPTS -->
+    <script src="https://code.jquery.com/jquery-3.3.1.slim.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.3/umd/popper.min.js"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.1.3/js/bootstrap.min.js"></script>
+
+    <script>
+        document.getElementById("tem_tag").addEventListener("change", function () {
+            const campoTag = document.getElementById("campo_tag");
+            if (this.checked) {
+                campoTag.style.display = "block";
+            } else {
+                campoTag.style.display = "none";
+                document.getElementById("codigo_tag").value = "";
+            }
+        });
+    </script>
+
+</body>
+
+</html>

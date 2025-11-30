@@ -1,0 +1,41 @@
+body {
+    /*background-color: linen;*/
+    background-color: rgb(219, 119, 19);
+    font-family: Arial, verdana;
+
+    padding: 30px;
+    /* 👈 adiciona espaço interno */
+    padding-top: 100px;
+    /* para não ficar atrás do navbar */
+}
+
+h1 {
+    color: maroon;
+    margin-left: 40px;
+}
+
+table,
+tr,
+td {
+    border-collapse: collapse;
+    padding: 10px;
+}
+
+#frmContainer {
+    width: 300px;
+}
+
+label {
+    display: inline-block;
+    width: 90px;
+    margin: 10px;
+}
+
+#btnInclusao {
+    float: right;
+}
+
+img {
+    width: 30px;
+    height: 30px;
+}
