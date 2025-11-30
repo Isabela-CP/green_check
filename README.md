@@ -1,6 +1,4 @@
-# Green Check - Versão Python
-
-Esta é a versão Python do projeto Green Check, convertida do projeto original em Node.js/Express.
+# Green Check 
 
 ## Estrutura do Projeto
 
@@ -34,6 +32,21 @@ green_check_python/
 
 ## Instalação
 
+### Requisitos
+
+Antes de iniciar, certifique-se de ter as seguintes versões instaladas:
+
+- **Docker**: versão 20.10 ou superior
+- **Docker Compose**: versão 2.0 ou superior (ou Docker Compose Plugin v2)
+- **Make**: versão 4.0 ou superior (geralmente já incluído em sistemas Linux/macOS)
+
+Para verificar as versões instaladas:
+```bash
+docker --version
+docker compose version
+make --version
+```
+
 ### Opção 1: Usando Make (Recomendado)
 
 O projeto inclui um `Makefile` com comandos simplificados:
@@ -55,20 +68,20 @@ make dev
 
 1. Construa e inicie todos os serviços (banco de dados + aplicação web):
 ```bash
-docker-compose up -d --build
+docker compose up -d --build
 ```
 
 2. Verifique os logs:
 ```bash
-docker-compose logs -f web
+docker compose logs -f web
 ```
 
 3. Acesse a aplicação em `http://localhost:3000`
 
 **Comandos úteis:**
-- Parar os serviços: `docker-compose down`
-- Ver logs: `docker-compose logs -f`
-- Reconstruir: `docker-compose up -d --build`
+- Parar os serviços: `docker compose down`
+- Ver logs: `docker compose logs -f`
+- Reconstruir: `docker compose up -d --build`
 
 ### Opção 3: Instalação Local
 
@@ -79,7 +92,7 @@ pip install -r requirements.txt
 
 2. Inicie o banco de dados PostgreSQL:
 ```bash
-docker-compose up -d db
+docker compose up -d db
 ```
 
 3. Execute o servidor:
@@ -111,7 +124,7 @@ docker compose down
 sudo rm -rf ./db/data
 
 # 3. Reiniciar os containers
-docker-compose up -d --build
+docker compose up -d --build
 ```
 
 ## Tecnologias Utilizadas
@@ -124,12 +137,6 @@ docker-compose up -d --build
 - **Docker**: Containerização da aplicação
 - **Docker Compose**: Orquestração de serviços
 
-## Diferenças da Versão Node.js
-
-- **Templates**: Marko → Jinja2
-- **Framework**: Express → Flask
-- **Banco de Dados**: pg (Node.js) → psycopg2 (Python)
-- **Estrutura**: Mantida similar para facilitar comparação
 
 ## Rotas Disponíveis
 
