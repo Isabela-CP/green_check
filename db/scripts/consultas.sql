@@ -125,3 +125,94 @@ ORDER BY solicitacoes_abertas_sem_manutencao DESC;
 -- FIM DA CONSULTA 2
 -- ============================================================================
 
+-- ============================================================================
+-- CONSULTA 3: Identificação de Empresas com Qualificação Completa para Risco Ecológico (Divisão Relacional)
+-- ============================================================================
+-- 
+-- Motivação:
+-- Identificar empresas terceirizadas que realizaram remoção/corte em TODAS
+-- as espécies nativas que já tiveram risco 'alto' em alguma vistoria. Isso
+-- permite identificar empresas com experiência completa em lidar com espécies
+-- nativas de alto risco, importante para preservação ambiental.
+--
+-- Explicação:
+-- Esta é uma consulta de DIVISÃO RELACIONAL, que identifica empresas que
+-- atenderam a TODAS as espécies nativas que já tiveram risco alto.
+-- 
+-- A consulta funciona em duas partes:
+-- 1. Divisor (subconsulta): Conta quantas espécies nativas diferentes já
+--    tiveram risco 'alto' em alguma vistoria.
+-- 2. Dividendo (consulta principal): Para cada empresa, conta quantas
+--    espécies nativas diferentes ela cortou/removeu.
+-- 3. HAVING: Compara se o número de espécies atendidas pela empresa é igual
+--    ao número total de espécies nativas que tiveram risco alto.
+--
+-- Complexidade: Alta (Divisão Relacional)
+-- - Utiliza divisão relacional (HAVING com subconsulta)
+-- - Múltiplos JOINs para relacionar empresa → manutenção → vistoria → árvore → espécie
+-- - Verificação de espécies nativas através de JOIN com tabela especie
+-- - Agregação com COUNT DISTINCT para contar espécies únicas
+--
+-- Tabelas utilizadas:
+-- - empresa_terceirizada: Empresas que realizam manutenções
+-- - manutencao: Manutenções realizadas (filtro por tipo 'remocao')
+-- - vistoria_inicial: Vistorias que identificaram risco alto
+-- - arvore: Árvores que foram vistoriadas/manutenidas
+-- - especie: Informação sobre espécies (campo nativa)
+--
+-- Campos utilizados:
+-- - empresa_terceirizada.cnpj: Identificador da empresa
+-- - manutencao.tipo: Tipo de manutenção (deve ser 'remocao')
+-- - manutencao.cod_solicitacao: Relaciona manutenção com vistoria
+-- - vistoria_inicial.cod_solicitacao: Relaciona vistoria com solicitação
+-- - vistoria_inicial.risco: Nível de risco (deve ser 'alto')
+-- - vistoria_inicial.latitude, longitude, contador: Identificam a árvore
+-- - arvore.nome_cientifico: Nome científico da espécie
+-- - especie.nativa: Indica se a espécie é nativa (TRUE) ou exótica (FALSE)
+--
+-- Valores de tipo de manutenção permitidos (definidos por constraint CHECK):
+-- - 'poda'
+-- - 'remocao'
+-- - 'tratamento'
+--
+-- Observações importantes:
+-- 1. A consulta usa 'remocao' como equivalente a 'corte', pois 'corte' não
+--    existe no banco de dados atual.
+-- 2. É necessário fazer JOIN com a tabela especie para verificar se uma
+--    espécie é nativa, pois arvore.tipo indica apenas se é 'público' ou
+--    'privado', não se a espécie é nativa.
+-- 3. A consulta retornará apenas empresas que atenderam TODAS as espécies
+--    nativas que tiveram risco alto (divisão relacional completa).
+-- ============================================================================
+SELECT 
+    e.cnpj,
+    COUNT(DISTINCT a.nome_cientifico) AS especies_criticas_atendidas
+FROM empresa_terceirizada e
+JOIN manutencao m ON m.cnpj = e.cnpj
+JOIN vistoria_inicial v ON v.cod_solicitacao = m.cod_solicitacao
+JOIN arvore a 
+    ON v.latitude = a.latitude 
+    AND v.longitude = a.longitude 
+    AND v.contador = a.contador
+JOIN especie esp ON esp.nome_cientifico = a.nome_cientifico
+WHERE m.tipo = 'remocao'  -- A empresa tem que ter feito remoção (equivalente a corte)
+  AND esp.nativa = TRUE    -- Apenas espécies nativas
+GROUP BY e.cnpj
+HAVING COUNT(DISTINCT a.nome_cientifico) = (
+    -- O DIVISOR COMPLEXO: 
+    -- Quantas espécies NATIVAS já tiveram risco ALTO na história?
+    SELECT COUNT(DISTINCT a_alvo.nome_cientifico)
+    FROM arvore a_alvo
+    JOIN especie esp_alvo ON esp_alvo.nome_cientifico = a_alvo.nome_cientifico
+    JOIN vistoria_inicial v_alvo 
+        ON v_alvo.latitude = a_alvo.latitude 
+        AND v_alvo.longitude = a_alvo.longitude 
+        AND v_alvo.contador = a_alvo.contador
+    WHERE esp_alvo.nativa = TRUE   -- Condição 1: Espécie nativa
+      AND v_alvo.risco = 'alto'     -- Condição 2: Histórico de risco alto
+);
+
+-- ============================================================================
+-- FIM DA CONSULTA 3
+-- ============================================================================
+

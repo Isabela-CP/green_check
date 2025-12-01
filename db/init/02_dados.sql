@@ -128,7 +128,14 @@ VALUES
     ('22222222222', '44444444444', 'Situação crítica na Ficus', 'Jardim América', 'Av. Paulista', '456', '2024-07-10', '10:00:00', 'válida'),
     
     -- Solicitação 7: Reavaliação da Árvore 8 (aumento de risco)
-    ('11111111111', '55555555555', 'Reavaliação do Ipê-roxo', 'Pinheiros', 'Rua dos Pinheiros', '321', '2024-05-05', '14:00:00', 'válida')
+    ('11111111111', '55555555555', 'Reavaliação do Ipê-roxo', 'Pinheiros', 'Rua dos Pinheiros', '321', '2024-05-05', '14:00:00', 'válida'),
+    
+    -- Solicitações para testar consulta de divisão relacional (árvores nativas com risco alto)
+    -- Solicitação 8: Ipê-roxo nativo com risco alto
+    ('11111111111', '44444444444', 'Ipê-roxo com risco alto de queda', 'Centro', 'Rua das Flores', '200', '2024-08-01', '10:00:00', 'válida'),
+    
+    -- Solicitação 9: Aroeira nativa com risco alto
+    ('22222222222', '44444444444', 'Aroeira com risco alto de queda', 'Jardim América', 'Av. Paulista', '500', '2024-08-05', '14:00:00', 'válida')
 ON CONFLICT DO NOTHING;
 
 -- ----------------------------------------------------------------------------
@@ -166,7 +173,14 @@ VALUES
     (6, '2024-07-15', '11:00:00', 'critico', 'ok', -23.552520, -46.635308, 1),
     
     -- Árvore 8: risco 'baixo' (2024-03-22) -> risco 'medio' (2024-05-10) - AUMENTO
-    (7, '2024-05-10', '15:40:00', 'medio', 'ok', -23.556520, -46.639308, 1)
+    (7, '2024-05-10', '15:40:00', 'medio', 'ok', -23.556520, -46.639308, 1),
+    
+    -- Vistorias para testar consulta de divisão relacional (árvores nativas com risco alto)
+    -- Vistoria 8: Solicitação 8 -> Árvore 1 (Ipê-roxo nativo) com risco 'alto'
+    (8, '2024-08-02', '11:00:00', 'alto', 'ok', -23.550520, -46.633308, 1),
+    
+    -- Vistoria 9: Solicitação 9 -> Árvore 4 (Aroeira nativa) com risco 'alto'
+    (9, '2024-08-06', '15:00:00', 'alto', 'ok', -23.553520, -46.636308, 1)
 ON CONFLICT (cod_solicitacao) DO NOTHING;
 
 -- ----------------------------------------------------------------------------
@@ -181,7 +195,17 @@ VALUES
     (2, 'remocao', 'Árvore removida devido ao risco de queda. Compensação ambiental necessária', '98765432000110', 'Serviço', '15 dias', '44444444444'),
     
     -- Manutenção 3: Tratamento de raízes
-    (4, 'tratamento', 'Aplicação de tratamento nas raízes expostas e nivelamento da calçada', '12345678000190', 'Serviço', '45 dias', '55555555555')
+    (4, 'tratamento', 'Aplicação de tratamento nas raízes expostas e nivelamento da calçada', '12345678000190', 'Serviço', '45 dias', '55555555555'),
+    
+    -- Manutenções para testar consulta de divisão relacional
+    -- Manutenção 4: Remoção de Ipê-roxo nativo (risco alto) - Empresa que atende TODAS as espécies
+    (8, 'remocao', 'Remoção de Ipê-roxo nativo com risco alto de queda', '98765432000110', 'Serviço', '20 dias', '44444444444'),
+    
+    -- Manutenção 5: Remoção de Aroeira nativa (risco alto) - Mesma empresa (atende TODAS)
+    (9, 'remocao', 'Remoção de Aroeira nativa com risco alto de queda', '98765432000110', 'Serviço', '20 dias', '44444444444'),
+    
+    -- Manutenção 6: Remoção de Ipê-roxo nativo (risco alto) - Outra empresa (atende apenas UMA espécie, não todas)
+    (8, 'remocao', 'Remoção de Ipê-roxo nativo com risco alto - apenas uma espécie atendida', '12345678000190', 'Serviço', '20 dias', '44444444444')
 ON CONFLICT (cod_solicitacao, tipo) DO NOTHING;
 
 -- ----------------------------------------------------------------------------
@@ -192,7 +216,9 @@ VALUES
     (1, 'poda', '/fotos/manutencao_001_poda_antes.jpg'),
     (1, 'poda', '/fotos/manutencao_001_poda_depois.jpg'),
     (2, 'remocao', '/fotos/manutencao_002_remocao.jpg'),
-    (4, 'tratamento', '/fotos/manutencao_004_tratamento.jpg')
+    (4, 'tratamento', '/fotos/manutencao_004_tratamento.jpg'),
+    (8, 'remocao', '/fotos/manutencao_008_remocao_ipe_roxo.jpg'),
+    (9, 'remocao', '/fotos/manutencao_009_remocao_aroeira.jpg')
 ON CONFLICT (cod_solicitacao, tipo, caminho_foto) DO NOTHING;
 
 -- ----------------------------------------------------------------------------
@@ -215,10 +241,10 @@ ON CONFLICT (tipo, cod_solicitacao) DO NOTHING;
 -- - especie: 6 tuplas
 -- - arvore: 8 tuplas
 -- - tag: 4 tuplas
--- - solicitacao: 7 tuplas (4 iniciais + 3 para testar aumento de risco)
+-- - solicitacao: 9 tuplas (4 iniciais + 3 para aumento de risco + 2 para divisão relacional)
 -- - fotos_solicitacao: 6 tuplas
--- - vistoria_inicial: 6 tuplas (3 iniciais + 3 subsequentes para testar aumento de risco)
--- - manutencao: 3 tuplas
--- - foto_manutencao: 4 tuplas
+-- - vistoria_inicial: 8 tuplas (3 iniciais + 3 subsequentes + 2 para divisão relacional)
+-- - manutencao: 6 tuplas (3 iniciais + 3 para divisão relacional)
+-- - foto_manutencao: 6 tuplas (4 iniciais + 2 para divisão relacional)
 -- - compensacao_ambiental: 1 tupla
 -- ============================================================================
