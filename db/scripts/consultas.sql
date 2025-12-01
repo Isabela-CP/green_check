@@ -290,3 +290,86 @@ ORDER BY v.risco, quantidade DESC;
 -- FIM DA CONSULTA 4
 -- ============================================================================
 
+-- ============================================================================
+-- CONSULTA 5: Identificação de Manutenções Ineficazes
+-- ============================================================================
+-- 
+-- Motivação:
+-- Identificar casos onde uma manutenção foi realizada (ex: uma poda), mas em
+-- menos de 60 dias a mesma árvore gerou uma nova vistoria apontando risco
+-- 'alto' ou 'medio'. Isso indica que o serviço pode ter sido mal feito pela
+-- empresa terceirizada ou que o diagnóstico inicial estava errado.
+--
+-- Explicação:
+-- A consulta identifica manutenções que não foram efetivas, comparando:
+-- 1. A data da manutenção (vistoria original)
+-- 2. Novas vistorias na mesma árvore dentro de 60 dias
+-- 3. Se a nova vistoria aponta risco preocupante ('alto' ou 'medio')
+--
+-- Complexidade: Média-Alta
+-- - Utiliza auto-join em vistoria_inicial para comparar vistorias da mesma árvore
+-- - Filtro temporal (60 dias) usando aritmética de datas
+-- - Múltiplos JOINs para relacionar manutenção → vistoria → árvore → empresa
+-- - Cálculo de dias entre manutenção e nova vistoria
+--
+-- Tabelas utilizadas:
+-- - manutencao: Manutenções realizadas
+-- - vistoria_inicial: Vistorias originais e novas (auto-join)
+-- - empresa_terceirizada: Empresas responsáveis pelas manutenções
+-- - arvore: Árvores que foram manutenidas e revistoriadas
+--
+-- Campos utilizados:
+-- - manutencao.cod_solicitacao: Relaciona manutenção com vistoria original
+-- - manutencao.tipo: Tipo de serviço executado
+-- - manutencao.cnpj: Identifica a empresa responsável
+-- - vistoria_inicial.data: Data da vistoria (original e nova)
+-- - vistoria_inicial.risco: Nível de risco da nova vistoria
+-- - vistoria_inicial.latitude, longitude, contador: Identificam a árvore
+-- - arvore.nome_cientifico: Nome científico da espécie
+-- - empresa_terceirizada.cnpj: CNPJ da empresa
+--
+-- Valores de risco permitidos (definidos por constraint CHECK):
+-- - 'baixo'
+-- - 'medio'
+-- - 'alto'
+-- - 'critico'
+--
+-- Observações importantes:
+-- 1. A consulta considera apenas riscos 'alto' ou 'medio' como preocupantes.
+--    Riscos 'baixo' ou 'critico' não são considerados reincidência.
+-- 2. O filtro temporal de 60 dias é calculado usando aritmética de datas
+--    do PostgreSQL (v_origem.data + 60).
+-- 3. A condição v_nova.data > v_origem.data garante que apenas vistorias
+--    posteriores à manutenção sejam consideradas.
+-- 4. A ordenação por dias_apos_servico ASC mostra os casos mais críticos
+--    primeiro (menos tempo entre manutenção e problema).
+-- ============================================================================
+SELECT 
+    e.cnpj AS empresa_responsavel,
+    m.tipo AS servico_executado,
+    a.nome_cientifico,
+    v_origem.data AS data_servico,
+    v_nova.data AS data_novo_problema,
+    v_nova.risco AS risco_reincidente,
+    (v_nova.data - v_origem.data) AS dias_apos_servico
+FROM manutencao m
+JOIN vistoria_inicial v_origem ON m.cod_solicitacao = v_origem.cod_solicitacao
+JOIN empresa_terceirizada e ON m.cnpj = e.cnpj
+JOIN arvore a 
+    ON v_origem.latitude = a.latitude 
+    AND v_origem.longitude = a.longitude 
+    AND v_origem.contador = a.contador
+JOIN vistoria_inicial v_nova 
+    ON v_nova.latitude = a.latitude 
+    AND v_nova.longitude = a.longitude 
+    AND v_nova.contador = a.contador
+WHERE 
+    v_nova.data > v_origem.data 
+    AND v_nova.data <= (v_origem.data + 60)
+    AND v_nova.risco IN ('alto', 'medio')
+ORDER BY dias_apos_servico ASC;
+
+-- ============================================================================
+-- FIM DA CONSULTA 5
+-- ============================================================================
+
