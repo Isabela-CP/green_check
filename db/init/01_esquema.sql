@@ -70,11 +70,12 @@ CREATE TABLE fotos_solicitacao (
     PRIMARY KEY (codigo, caminho_foto)
 );
 
--- nome_cientifico
-CREATE TABLE nome_cientifico (
-    nome_cientifico TEXT PRIMARY KEY,
-    nome_popular TEXT,
-    nativa BOOLEAN
+-- ESPÉCIE (Tabela de espécies de árvores)
+-- Armazena informações sobre as espécies de árvores cadastradas no sistema
+CREATE TABLE especie (
+    nome_cientifico TEXT PRIMARY KEY,  -- Nome científico da espécie (chave primária)
+    nome_popular TEXT,                  -- Nome popular/comum da espécie
+    nativa BOOLEAN                      -- Indica se a espécie é nativa (TRUE) ou exótica (FALSE)
 );
 
 -- arvore
@@ -83,7 +84,7 @@ CREATE TABLE arvore (
     latitude NUMERIC NOT NULL,
     longitude NUMERIC NOT NULL,
     contador INTEGER NOT NULL,
-    nome_cientifico TEXT REFERENCES nome_cientifico(nome_cientifico),
+    nome_cientifico TEXT REFERENCES especie(nome_cientifico),
     ultima_vistoria DATE,
     status TEXT,
     tipo TEXT,
@@ -119,7 +120,8 @@ CREATE TABLE vistoria_inicial (
     PRIMARY KEY (cod_solicitacao),
     FOREIGN KEY (latitude, longitude, contador)
         REFERENCES arvore(latitude, longitude, contador),
-    CONSTRAINT ck_vistoria_status CHECK (status IN ('inválida', 'ok'))
+    CONSTRAINT ck_vistoria_status CHECK (status IN ('inválida', 'ok')),
+    CONSTRAINT ck_vistoria_risco CHECK (risco IN ('baixo', 'medio', 'alto', 'critico'))
 );
 
 -- manutencao
