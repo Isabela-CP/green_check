@@ -121,6 +121,56 @@ O servidor estará disponível em `http://localhost:3000`
 - Email: `carlos.lima@crea.com` | Senha: `senha11111`
 - Ver seção completa de credenciais acima.
 
+## Testar Consultas SQL
+
+O projeto inclui consultas SQL complexas em `db/scripts/consultas.sql` que podem ser testadas diretamente no banco de dados.
+
+### Usando psql (linha de comando)
+
+Para testar as consultas usando o `psql`, execute:
+
+```bash
+psql -h localhost -p 5555 -U arvore_user -d arvore_urbana
+```
+
+Quando solicitado, digite a senha: `arvore_pass`
+
+Dentro do `psql`, você pode:
+
+1. **Executar uma consulta específica:**
+   ```sql
+   -- Copie e cole a consulta desejada do arquivo db/scripts/consultas.sql
+   ```
+
+2. **Executar todas as consultas de um arquivo:**
+   ```sql
+   \i db/scripts/consultas.sql
+   ```
+
+3. **Executar uma consulta diretamente do arquivo (sem entrar no psql):**
+   ```bash
+   psql -h localhost -p 5555 -U arvore_user -d arvore_urbana -f db/scripts/consultas.sql
+   ```
+
+### Usando Cliente Gráfico PostgreSQL
+
+Você também pode usar qualquer cliente gráfico PostgreSQL de sua preferência, como:
+- **pgAdmin**
+- **DBeaver**
+- **DataGrip**
+- **TablePlus**
+- **Postico** (macOS)
+- **pgAdmin Web** (via Docker)
+
+**Configurações de conexão:**
+- **Host:** `localhost`
+- **Porta:** `5555`
+- **Usuário:** `arvore_user`
+- **Senha:** `arvore_pass`
+- **Banco de dados:** `arvore_urbana`
+
+Após conectar, você pode abrir e executar as consultas do arquivo `db/scripts/consultas.sql`.
+
 ## Reiniciar o Banco de Dados (Alterações no Schema)
 
 Quando o schema do banco de dados (`db/init/01_schema.sql`) for alterado, é necessário reiniciar o banco de dados para que as mudanças sejam aplicadas. **ATENÇÃO:** Isso irá apagar todos os dados existentes no banco.
