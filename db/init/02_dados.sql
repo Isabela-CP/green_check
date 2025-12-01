@@ -50,9 +50,9 @@ VALUES
 ON CONFLICT (cnpj) DO NOTHING;
 
 -- ----------------------------------------------------------------------------
--- 5. NOMES CIENTÍFICOS (Espécies de árvores)
+-- 5. ESPÉCIES (Espécies de árvores)
 -- ----------------------------------------------------------------------------
-INSERT INTO nome_cientifico (nome_cientifico, nome_popular, nativa)
+INSERT INTO especie (nome_cientifico, nome_popular, nativa)
 VALUES 
     ('Handroanthus impetiginosus', 'Ipê-roxo', TRUE),
     ('Tipuana tipu', 'Tipuana', FALSE),
@@ -118,7 +118,17 @@ VALUES
     ('33333333333', '55555555555', 'Árvore muito alta', 'Vila Madalena', 'Rua Harmonia', '789', '2024-01-20', '09:15:00', 'inválida'),
     
     -- Solicitação 4: Nova solicitação
-    ('11111111111', '55555555555', 'Árvore com raízes expostas causando danos na calçada', 'Pinheiros', 'Rua dos Pinheiros', '321', '2024-03-20', '16:45:00', 'válida')
+    ('11111111111', '55555555555', 'Árvore com raízes expostas causando danos na calçada', 'Pinheiros', 'Rua dos Pinheiros', '321', '2024-03-20', '16:45:00', 'válida'),
+    
+    -- Solicitações adicionais para testar aumento de risco
+    -- Solicitação 5: Reavaliação da Árvore 2 (aumento de risco)
+    ('11111111111', '44444444444', 'Agravamento observado após temporal', 'Centro', 'Rua das Flores', '123', '2024-05-28', '08:00:00', 'válida'),
+    
+    -- Solicitação 6: Reavaliação da Árvore 3 (aumento de risco)
+    ('22222222222', '44444444444', 'Situação crítica na Ficus', 'Jardim América', 'Av. Paulista', '456', '2024-07-10', '10:00:00', 'válida'),
+    
+    -- Solicitação 7: Reavaliação da Árvore 8 (aumento de risco)
+    ('11111111111', '55555555555', 'Reavaliação do Ipê-roxo', 'Pinheiros', 'Rua dos Pinheiros', '321', '2024-05-05', '14:00:00', 'válida')
 ON CONFLICT DO NOTHING;
 
 -- ----------------------------------------------------------------------------
@@ -140,13 +150,23 @@ ON CONFLICT (codigo, caminho_foto) DO NOTHING;
 INSERT INTO vistoria_inicial (cod_solicitacao, data, hora, risco, status, latitude, longitude, contador)
 VALUES 
     -- Vistoria 1: Solicitação 1 -> Árvore 2 (Tipuana doente)
-    (1, '2024-02-18', '09:00:00', 'Médio', 'ok', -23.551520, -46.634308, 1),
+    (1, '2024-02-18', '09:00:00', 'medio', 'ok', -23.551520, -46.634308, 1),
     
     -- Vistoria 2: Solicitação 2 -> Árvore 3 (Ficus em risco)
-    (2, '2024-03-08', '10:30:00', 'Alto', 'ok', -23.552520, -46.635308, 1),
+    (2, '2024-03-08', '10:30:00', 'alto', 'ok', -23.552520, -46.635308, 1),
     
     -- Vistoria 3: Solicitação 4 -> Árvore 8 (Ipê-roxo doente) - vistoria inválida
-    (4, '2024-03-22', '14:00:00', 'Baixo', 'invalida', -23.556520, -46.639308, 1)
+    (4, '2024-03-22', '14:00:00', 'baixo', 'inválida', -23.556520, -46.639308, 1),
+    
+    -- Vistorias subsequentes da mesma árvore para testar aumento de risco
+    -- Árvore 2: risco 'medio' (2024-02-18) -> risco 'alto' (2024-06-01) - AUMENTO
+    (5, '2024-06-01', '09:00:00', 'alto', 'ok', -23.551520, -46.634308, 1),
+    
+    -- Árvore 3: risco 'alto' (2024-03-08) -> risco 'critico' (2024-07-15) - AUMENTO
+    (6, '2024-07-15', '11:00:00', 'critico', 'ok', -23.552520, -46.635308, 1),
+    
+    -- Árvore 8: risco 'baixo' (2024-03-22) -> risco 'medio' (2024-05-10) - AUMENTO
+    (7, '2024-05-10', '15:40:00', 'medio', 'ok', -23.556520, -46.639308, 1)
 ON CONFLICT (cod_solicitacao) DO NOTHING;
 
 -- ----------------------------------------------------------------------------
@@ -199,12 +219,12 @@ ON CONFLICT (tipo, cod_solicitacao) DO NOTHING;
 -- - municipe: 4 tuplas
 -- - responsavel_tecnico: 2 tuplas
 -- - empresa_terceirizada: 3 tuplas
--- - nome_cientifico: 6 tuplas
+-- - especie: 6 tuplas
 -- - arvore: 8 tuplas
 -- - tag: 4 tuplas
--- - solicitacao: 4 tuplas
+-- - solicitacao: 7 tuplas (4 iniciais + 3 para testar aumento de risco)
 -- - fotos_solicitacao: 6 tuplas
--- - vistoria_inicial: 3 tuplas
+-- - vistoria_inicial: 6 tuplas (3 iniciais + 3 subsequentes para testar aumento de risco)
 -- - manutencao: 4 tuplas
 -- - foto_manutencao: 5 tuplas
 -- - compensacao_ambiental: 2 tuplas
