@@ -216,3 +216,77 @@ HAVING COUNT(DISTINCT a.nome_cientifico) = (
 -- FIM DA CONSULTA 3
 -- ============================================================================
 
+-- ============================================================================
+-- CONSULTA 4: Tipos de Manutenção mais Frequentes por Nível de Risco
+-- ============================================================================
+-- 
+-- Motivação:
+-- Analisar quais tipos de manutenção são mais aplicados para cada nível de
+-- risco identificado na vistoria inicial, permitindo entender padrões de
+-- intervenção e planejar recursos adequados para cada tipo de situação.
+--
+-- Explicação:
+-- Agrupa as manutenções por nível de risco e tipo de manutenção, calculando:
+-- 1. Quantidade de manutenções de cada tipo por risco
+-- 2. Total de manutenções para cada nível de risco
+-- 3. Percentual que cada tipo representa em relação ao total do risco
+--
+-- Complexidade: Média
+-- - Utiliza CTE (Common Table Expression) para otimizar cálculo de totais
+-- - Agregação com COUNT para quantificar manutenções
+-- - Cálculo de percentuais com ROUND para precisão de 2 casas decimais
+-- - INNER JOIN garante que apenas vistorias com manutenção sejam consideradas
+--
+-- Tabelas utilizadas:
+-- - vistoria_inicial: Vistorias que identificaram níveis de risco
+-- - manutencao: Manutenções realizadas após as vistorias
+--
+-- Campos utilizados:
+-- - vistoria_inicial.risco: Nível de risco (validado por constraint CHECK)
+-- - vistoria_inicial.cod_solicitacao: Identificador único da vistoria
+-- - manutencao.tipo: Tipo de manutenção (validado por constraint CHECK)
+-- - manutencao.cod_solicitacao: Relaciona manutenção com vistoria
+--
+-- Valores de risco permitidos (definidos por constraint CHECK):
+-- - 'baixo'
+-- - 'medio'
+-- - 'alto'
+-- - 'critico'
+--
+-- Valores de tipo de manutenção permitidos (definidos por constraint CHECK):
+-- - 'poda'
+-- - 'remocao'
+-- - 'tratamento'
+--
+-- Observações importantes:
+-- 1. A consulta usa INNER JOIN, então apenas vistorias que possuem manutenção
+--    são incluídas nos resultados.
+-- 2. O CTE otimiza a consulta evitando calcular o total de manutenções por
+--    risco múltiplas vezes.
+-- 3. A ordenação é por risco (alfabética) e quantidade (decrescente), mostrando
+--    os tipos mais frequentes primeiro para cada risco.
+-- ============================================================================
+WITH totais_por_risco AS (
+    SELECT 
+        v.risco,
+        COUNT(*) AS total
+    FROM vistoria_inicial v
+    INNER JOIN manutencao m ON m.cod_solicitacao = v.cod_solicitacao
+    GROUP BY v.risco
+)
+SELECT 
+    v.risco,
+    m.tipo AS tipo_manutencao,
+    COUNT(*) AS quantidade,
+    t.total AS total_manutencoes_risco,
+    ROUND((COUNT(*) * 100.0) / t.total, 2) AS percentual
+FROM vistoria_inicial v
+INNER JOIN manutencao m ON m.cod_solicitacao = v.cod_solicitacao
+INNER JOIN totais_por_risco t ON t.risco = v.risco
+GROUP BY v.risco, m.tipo, t.total
+ORDER BY v.risco, quantidade DESC;
+
+-- ============================================================================
+-- FIM DA CONSULTA 4
+-- ============================================================================
+

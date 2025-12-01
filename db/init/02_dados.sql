@@ -135,7 +135,14 @@ VALUES
     ('11111111111', '44444444444', 'Ipê-roxo com risco alto de queda', 'Centro', 'Rua das Flores', '200', '2024-08-01', '10:00:00', 'válida'),
     
     -- Solicitação 9: Aroeira nativa com risco alto
-    ('22222222222', '44444444444', 'Aroeira com risco alto de queda', 'Jardim América', 'Av. Paulista', '500', '2024-08-05', '14:00:00', 'válida')
+    ('22222222222', '44444444444', 'Aroeira com risco alto de queda', 'Jardim América', 'Av. Paulista', '500', '2024-08-05', '14:00:00', 'válida'),
+    
+    -- Solicitações para testar consulta de tipos de manutenção por risco
+    -- Solicitação 10: Árvore com risco alto e manutenção tipo poda
+    ('11111111111', '44444444444', 'Palmeira-jerivá com galhos secos em risco alto', 'Centro', 'Rua das Flores', '300', '2024-09-01', '11:00:00', 'válida'),
+    
+    -- Solicitação 11: Árvore com risco baixo e manutenção tipo poda
+    ('22222222222', '55555555555', 'Palmeira-jerivá necessitando poda preventiva', 'Jardim América', 'Av. Paulista', '600', '2024-09-05', '15:00:00', 'válida')
 ON CONFLICT DO NOTHING;
 
 -- ----------------------------------------------------------------------------
@@ -180,7 +187,14 @@ VALUES
     (8, '2024-08-02', '11:00:00', 'alto', 'ok', -23.550520, -46.633308, 1),
     
     -- Vistoria 9: Solicitação 9 -> Árvore 4 (Aroeira nativa) com risco 'alto'
-    (9, '2024-08-06', '15:00:00', 'alto', 'ok', -23.553520, -46.636308, 1)
+    (9, '2024-08-06', '15:00:00', 'alto', 'ok', -23.553520, -46.636308, 1),
+    
+    -- Vistorias para testar consulta de tipos de manutenção por risco
+    -- Vistoria 10: Solicitação 10 -> Árvore 6 (Palmeira-jerivá) com risco 'alto'
+    (10, '2024-09-02', '12:00:00', 'alto', 'ok', -23.554520, -46.637308, 2),
+    
+    -- Vistoria 11: Solicitação 11 -> Árvore 7 (Palmeira-jerivá) com risco 'baixo'
+    (11, '2024-09-06', '16:00:00', 'baixo', 'ok', -23.555520, -46.638308, 1)
 ON CONFLICT (cod_solicitacao) DO NOTHING;
 
 -- ----------------------------------------------------------------------------
@@ -205,7 +219,14 @@ VALUES
     (9, 'remocao', 'Remoção de Aroeira nativa com risco alto de queda', '98765432000110', 'Serviço', '20 dias', '44444444444'),
     
     -- Manutenção 6: Remoção de Ipê-roxo nativo (risco alto) - Outra empresa (atende apenas UMA espécie, não todas)
-    (8, 'remocao', 'Remoção de Ipê-roxo nativo com risco alto - apenas uma espécie atendida', '12345678000190', 'Serviço', '20 dias', '44444444444')
+    (8, 'remocao', 'Remoção de Ipê-roxo nativo com risco alto - apenas uma espécie atendida', '12345678000190', 'Serviço', '20 dias', '44444444444'),
+    
+    -- Manutenções para testar consulta de tipos de manutenção por risco
+    -- Manutenção 7: Poda em árvore com risco alto
+    (10, 'poda', 'Poda de emergência em palmeira-jerivá com risco alto de queda de galhos', '12345678000190', 'Serviço', '10 dias', '44444444444'),
+    
+    -- Manutenção 8: Poda em árvore com risco baixo
+    (11, 'poda', 'Poda preventiva em palmeira-jerivá com risco baixo', '12345678000190', 'Serviço', '15 dias', '55555555555')
 ON CONFLICT (cod_solicitacao, tipo) DO NOTHING;
 
 -- ----------------------------------------------------------------------------
@@ -218,7 +239,9 @@ VALUES
     (2, 'remocao', '/fotos/manutencao_002_remocao.jpg'),
     (4, 'tratamento', '/fotos/manutencao_004_tratamento.jpg'),
     (8, 'remocao', '/fotos/manutencao_008_remocao_ipe_roxo.jpg'),
-    (9, 'remocao', '/fotos/manutencao_009_remocao_aroeira.jpg')
+    (9, 'remocao', '/fotos/manutencao_009_remocao_aroeira.jpg'),
+    (10, 'poda', '/fotos/manutencao_010_poda_risco_alto.jpg'),
+    (11, 'poda', '/fotos/manutencao_011_poda_risco_baixo.jpg')
 ON CONFLICT (cod_solicitacao, tipo, caminho_foto) DO NOTHING;
 
 -- ----------------------------------------------------------------------------
@@ -241,10 +264,10 @@ ON CONFLICT (tipo, cod_solicitacao) DO NOTHING;
 -- - especie: 6 tuplas
 -- - arvore: 8 tuplas
 -- - tag: 4 tuplas
--- - solicitacao: 9 tuplas (4 iniciais + 3 para aumento de risco + 2 para divisão relacional)
+-- - solicitacao: 11 tuplas (4 iniciais + 3 para aumento de risco + 2 para divisão relacional + 2 para tipos de manutenção)
 -- - fotos_solicitacao: 6 tuplas
--- - vistoria_inicial: 8 tuplas (3 iniciais + 3 subsequentes + 2 para divisão relacional)
--- - manutencao: 6 tuplas (3 iniciais + 3 para divisão relacional)
--- - foto_manutencao: 6 tuplas (4 iniciais + 2 para divisão relacional)
+-- - vistoria_inicial: 10 tuplas (3 iniciais + 3 subsequentes + 2 para divisão relacional + 2 para tipos de manutenção)
+-- - manutencao: 8 tuplas (3 iniciais + 3 para divisão relacional + 2 para tipos de manutenção)
+-- - foto_manutencao: 8 tuplas (4 iniciais + 2 para divisão relacional + 2 para tipos de manutenção)
 -- - compensacao_ambiental: 1 tupla
 -- ============================================================================
