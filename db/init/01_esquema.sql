@@ -134,7 +134,8 @@ CREATE TABLE manutencao (
     tipo_contrato TEXT,
     prazo TEXT,
     cpf_resp_tecnico CHAR(11) REFERENCES responsavel_tecnico(cpf),
-    PRIMARY KEY (cod_solicitacao, tipo)
+    PRIMARY KEY (cod_solicitacao, tipo),
+    CONSTRAINT ck_manutencao_tipo CHECK (tipo IN ('poda', 'remocao', 'tratamento'))
 );
 
 -- FOTOS DA manutencao

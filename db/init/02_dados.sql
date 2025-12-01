@@ -175,16 +175,13 @@ ON CONFLICT (cod_solicitacao) DO NOTHING;
 INSERT INTO manutencao (cod_solicitacao, tipo, laudo, cnpj, tipo_contrato, prazo, cpf_resp_tecnico)
 VALUES 
     -- Manutenção 1: Podas na árvore doente
-    (1, 'Poda', 'Realizada poda de galhos secos e tratamento fitossanitário', '12345678000190', 'Serviço', '30 dias', '44444444444'),
+    (1, 'poda', 'Realizada poda de galhos secos e tratamento fitossanitário', '12345678000190', 'Serviço', '30 dias', '44444444444'),
     
     -- Manutenção 2: Remoção de árvore em risco
-    (2, 'Remoção', 'Árvore removida devido ao risco de queda. Compensação ambiental necessária', '98765432000110', 'Serviço', '15 dias', '44444444444'),
+    (2, 'remocao', 'Árvore removida devido ao risco de queda. Compensação ambiental necessária', '98765432000110', 'Serviço', '15 dias', '44444444444'),
     
     -- Manutenção 3: Tratamento de raízes
-    (4, 'Tratamento', 'Aplicação de tratamento nas raízes expostas e nivelamento da calçada', '12345678000190', 'Serviço', '45 dias', '55555555555'),
-    
-    -- Manutenção 4: Compensação ambiental (relacionada com manutenção 2)
-    (2, 'Compensação', 'Plantio de 3 mudas nativas como compensação pela remoção', '11223344000150', 'Serviço', '60 dias', '44444444444')
+    (4, 'tratamento', 'Aplicação de tratamento nas raízes expostas e nivelamento da calçada', '12345678000190', 'Serviço', '45 dias', '55555555555')
 ON CONFLICT (cod_solicitacao, tipo) DO NOTHING;
 
 -- ----------------------------------------------------------------------------
@@ -192,11 +189,10 @@ ON CONFLICT (cod_solicitacao, tipo) DO NOTHING;
 -- ----------------------------------------------------------------------------
 INSERT INTO foto_manutencao (cod_solicitacao, tipo, caminho_foto)
 VALUES 
-    (1, 'Poda', '/fotos/manutencao_001_poda_antes.jpg'),
-    (1, 'Poda', '/fotos/manutencao_001_poda_depois.jpg'),
-    (2, 'Remoção', '/fotos/manutencao_002_remocao.jpg'),
-    (4, 'Tratamento', '/fotos/manutencao_004_tratamento.jpg'),
-    (2, 'Compensação', '/fotos/manutencao_002_compensacao_plantio.jpg')
+    (1, 'poda', '/fotos/manutencao_001_poda_antes.jpg'),
+    (1, 'poda', '/fotos/manutencao_001_poda_depois.jpg'),
+    (2, 'remocao', '/fotos/manutencao_002_remocao.jpg'),
+    (4, 'tratamento', '/fotos/manutencao_004_tratamento.jpg')
 ON CONFLICT (cod_solicitacao, tipo, caminho_foto) DO NOTHING;
 
 -- ----------------------------------------------------------------------------
@@ -204,11 +200,8 @@ ON CONFLICT (cod_solicitacao, tipo, caminho_foto) DO NOTHING;
 -- ----------------------------------------------------------------------------
 INSERT INTO compensacao_ambiental (tipo, cod_solicitacao, num_mudas, status)
 VALUES 
-    -- Compensação da remoção (manutenção tipo 'Compensação')
-    ('Compensação', 2, 3, 'finalizada'),
-    
-    -- Compensação futura (manutenção tipo 'Remoção')
-    ('Remoção', 2, 0, 'em aberto')
+    -- Compensação da remoção (manutenção tipo 'remocao')
+    ('remocao', 2, 3, 'finalizada')
 ON CONFLICT (tipo, cod_solicitacao) DO NOTHING;
 
 -- ============================================================================
@@ -225,7 +218,7 @@ ON CONFLICT (tipo, cod_solicitacao) DO NOTHING;
 -- - solicitacao: 7 tuplas (4 iniciais + 3 para testar aumento de risco)
 -- - fotos_solicitacao: 6 tuplas
 -- - vistoria_inicial: 6 tuplas (3 iniciais + 3 subsequentes para testar aumento de risco)
--- - manutencao: 4 tuplas
--- - foto_manutencao: 5 tuplas
--- - compensacao_ambiental: 2 tuplas
+-- - manutencao: 3 tuplas
+-- - foto_manutencao: 4 tuplas
+-- - compensacao_ambiental: 1 tupla
 -- ============================================================================
