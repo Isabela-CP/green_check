@@ -58,6 +58,18 @@ make dev
 
 2. Acesse a aplicação em `http://localhost:3000`
 
+3. Faça login usando uma das credenciais abaixo:
+
+**Credenciais de Acesso:**
+
+| Email | Senha | Papel |
+|-------|-------|-------|
+| `admin@sistema.com` | `123456789` | Munícipe |
+| `maria.silva@email.com` | `senha12345` | Munícipe |
+| `joao.oliveira@email.com` | `senha98765` | Munícipe |
+| `carlos.lima@crea.com` | `senha11111` | Responsável Técnico |
+| `fernanda.rodrigues@crea.com` | `senha22222` | Responsável Técnico |
+
 **Comandos disponíveis:**
 - `make dev` - Inicia os containers em modo desenvolvimento (com logs visíveis)
 - `make down` - Para os containers
@@ -77,6 +89,8 @@ docker compose logs -f web
 ```
 
 3. Acesse a aplicação em `http://localhost:3000`
+
+4. Faça login usando uma das credenciais da seção "Credenciais de Acesso" acima.
 
 **Comandos úteis:**
 - Parar os serviços: `docker compose down`
@@ -101,6 +115,11 @@ python server.py
 ```
 
 O servidor estará disponível em `http://localhost:3000`
+
+**Credenciais de Acesso:**
+- Email: `admin@sistema.com` | Senha: `123456789`
+- Email: `carlos.lima@crea.com` | Senha: `senha11111`
+- Ver seção completa de credenciais acima.
 
 ## Reiniciar o Banco de Dados (Alterações no Schema)
 
