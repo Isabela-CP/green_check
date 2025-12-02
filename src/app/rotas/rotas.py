@@ -57,6 +57,11 @@ def rotas(aplicacao):
     def insert_bd_especies():
         return cliente_cont.insere_nova_especie()()
 
+    @aplicacao.route('/api/especies', methods=['GET'])
+    @login_required
+    def busca_especies():
+        return cliente_cont.busca_especies()()
+
     @aplicacao.route('/logout')
     def logout():
         """Faz logout do usuário, limpando sessão e cookie"""

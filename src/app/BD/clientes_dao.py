@@ -282,3 +282,45 @@ class Clientes_dao:
         finally:
             if conn:
                 self._db_pool.putconn(conn)
+
+    # BUSCAR ESPÉCIES (para autocomplete)
+    def select_especies(self, termo_busca=None):
+        sql = """
+            SELECT
+                nome_cientifico,
+                nome_popular,
+                nativa
+            FROM especie
+        """
+        
+        params = []
+        
+        # Se houver termo de busca, filtrar por nome científico ou nome popular
+        if termo_busca:
+            sql += " WHERE nome_cientifico ILIKE %s OR nome_popular ILIKE %s"
+            termo_like = f"%{termo_busca}%"
+            params = [termo_like, termo_like]
+        
+        sql += " ORDER BY nome_cientifico"
+
+        print("SELECT ESPECIES =", sql, params)
+
+        conn = None
+        try:
+            conn = self._db_pool.getconn()
+            cursor = conn.cursor()
+            cursor.execute(sql, tuple(params) if params else None)
+            resultados = cursor.fetchall()
+
+            # Converter para lista de dicionários
+            colunas = [desc[0] for desc in cursor.description]
+            especies = [dict(zip(colunas, row)) for row in resultados]
+
+            cursor.close()
+            return None, especies
+        except Exception as erro:
+            print(f"Erro no select_especies: {erro}")
+            return erro, []
+        finally:
+            if conn:
+                self._db_pool.putconn(conn)

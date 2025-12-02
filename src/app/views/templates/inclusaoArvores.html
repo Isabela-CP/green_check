@@ -206,10 +206,24 @@
                 <input type="text" class="form-control" id="dap_cm" name="dap_cm">
             </div>
 
-            <!-- NOVO CAMPO: NOME CIENTÍFICO -->
+            <!-- NOVO CAMPO: NOME CIENTÍFICO COM BUSCA -->
             <div class="form-group">
                 <label for="nome_cientifico">Nome Científico:</label>
-                <input type="text" class="form-control" id="nome_cientifico" name="nome_cientifico">
+                <div class="input-group">
+                    <input type="text" class="form-control" id="nome_cientifico" name="nome_cientifico" 
+                           list="lista_especies" autocomplete="off" placeholder="Digite para buscar...">
+                    <div class="input-group-append">
+                        <button class="btn btn-outline-secondary" type="button" id="btn_buscar_especie" 
+                                style="background-color: #8BCF8A; border-color: #8BCF8A; color: white;">
+                            <i class="fa-solid fa-search"></i>
+                        </button>
+                    </div>
+                </div>
+                <datalist id="lista_especies"></datalist>
+                <small class="form-text text-muted">Digite o nome científico ou popular para buscar</small>
+                <div id="resultado_busca" class="mt-2" style="max-height: 200px; overflow-y: auto; display: none;">
+                    <ul class="list-group" id="lista_resultados"></ul>
+                </div>
             </div>
 
             <!-- CAMPO: POSSUI TAG? -->
@@ -257,6 +271,111 @@
     </script>
 
     <script>
+        // Busca de espécies
+        let timeoutBusca = null;
+        const inputNomeCientifico = document.getElementById("nome_cientifico");
+        const btnBuscarEspecie = document.getElementById("btn_buscar_especie");
+        const resultadoBusca = document.getElementById("resultado_busca");
+        const listaResultados = document.getElementById("lista_resultados");
+        const datalistEspecies = document.getElementById("lista_especies");
+
+        // Carregar todas as espécies ao carregar a página
+        function carregarEspecies(termo = '') {
+            const url = `/api/especies${termo ? '?q=' + encodeURIComponent(termo) : ''}`;
+            
+            fetch(url)
+                .then(response => response.json())
+                .then(especies => {
+                    // Limpar datalist e lista de resultados
+                    datalistEspecies.innerHTML = '';
+                    listaResultados.innerHTML = '';
+                    
+                    if (especies.length === 0) {
+                        resultadoBusca.style.display = 'none';
+                        return;
+                    }
+                    
+                    // Adicionar ao datalist
+                    especies.forEach(especie => {
+                        const option = document.createElement('option');
+                        option.value = especie.nome_cientifico;
+                        option.textContent = `${especie.nome_cientifico}${especie.nome_popular ? ' (' + especie.nome_popular + ')' : ''}`;
+                        datalistEspecies.appendChild(option);
+                    });
+                    
+                    // Se houver termo de busca, mostrar lista de resultados
+                    if (termo) {
+                        especies.forEach(especie => {
+                            const li = document.createElement('li');
+                            li.className = 'list-group-item';
+                            li.style.cursor = 'pointer';
+                            
+                            const tipo = especie.nativa ? 'Nativa' : 'Exótica';
+                            const badgeClass = especie.nativa ? 'badge-success' : 'badge-info';
+                            
+                            li.innerHTML = `
+                                <div>
+                                    <strong>${especie.nome_cientifico}</strong>
+                                    ${especie.nome_popular ? '<br><small class="text-muted">' + especie.nome_popular + '</small>' : ''}
+                                    <span class="badge ${badgeClass} float-right">${tipo}</span>
+                                </div>
+                            `;
+                            
+                            li.addEventListener('click', function() {
+                                inputNomeCientifico.value = especie.nome_cientifico;
+                                resultadoBusca.style.display = 'none';
+                            });
+                            
+                            listaResultados.appendChild(li);
+                        });
+                        
+                        resultadoBusca.style.display = 'block';
+                    } else {
+                        resultadoBusca.style.display = 'none';
+                    }
+                })
+                .catch(erro => {
+                    console.error('Erro ao buscar espécies:', erro);
+                });
+        }
+
+        // Buscar ao digitar (com debounce)
+        inputNomeCientifico.addEventListener('input', function() {
+            const termo = this.value.trim();
+            
+            clearTimeout(timeoutBusca);
+            
+            if (termo.length >= 2) {
+                timeoutBusca = setTimeout(() => {
+                    carregarEspecies(termo);
+                }, 300);
+            } else if (termo.length === 0) {
+                carregarEspecies(); // Carregar todas se campo estiver vazio
+                resultadoBusca.style.display = 'none';
+            } else {
+                resultadoBusca.style.display = 'none';
+            }
+        });
+
+        // Buscar ao clicar no botão
+        btnBuscarEspecie.addEventListener('click', function() {
+            const termo = inputNomeCientifico.value.trim();
+            carregarEspecies(termo || '');
+        });
+
+        // Carregar todas as espécies ao carregar a página
+        carregarEspecies();
+
+        // Fechar lista ao clicar fora
+        document.addEventListener('click', function(event) {
+            const target = event.target;
+            const formGroup = inputNomeCientifico.closest('.form-group');
+            
+            if (formGroup && !formGroup.contains(target)) {
+                resultadoBusca.style.display = 'none';
+            }
+        });
+
         document.getElementById("tem_tag").addEventListener("change", function () {
             const campoTag = document.getElementById("campo_tag");
             if (this.checked) {

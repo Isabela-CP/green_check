@@ -1,7 +1,7 @@
 # chamando a classe ClientesDAO
 from src.app.BD.clientes_dao import Clientes_dao
 from src.config.database import connection_pool
-from flask import render_template, redirect, request, flash
+from flask import render_template, redirect, request, flash, jsonify
 
 class ClientesControllers:
     def lista_arvore(self):
@@ -55,4 +55,14 @@ class ClientesControllers:
             # Sucesso: redireciona para listagem com mensagem de sucesso
             flash('Espécie cadastrada com sucesso!', 'success')
             return redirect('/inclusaoEspecies')
+        return view
+
+    def busca_especies(self):
+        def view():
+            cliente_dao = Clientes_dao(connection_pool)
+            termo_busca = request.args.get('q', '').strip()
+            erro, especies = cliente_dao.select_especies(termo_busca if termo_busca else None)
+            if erro:
+                return jsonify({'erro': str(erro)}), 500
+            return jsonify(especies)
         return view
