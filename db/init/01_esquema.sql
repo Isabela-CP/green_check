@@ -1,12 +1,12 @@
 
 -- TABELA: usuario
 CREATE TABLE usuario (
-    cpf VARCHAR(14) PRIMARY KEY,
+    cpf VARCHAR(11) PRIMARY KEY,
     nome TEXT NOT NULL,
-    telefone TEXT,
-    email TEXT NOT NULL,
-    senha TEXT NOT NULL,
-    papel TEXT NOT NULL,
+    telefone VARCHAR(11),
+    email VARCHAR(255) NOT NULL CHECK (email LIKE '%@%'),
+    senha VARCHAR(255) NOT NULL,
+    papel VARCHAR(20) NOT NULL CHECK (papel IN ('municipe', 'responsavel tecnico')),
 
     -- CPF deve ter tamanho 11 (sem pontos e traço)
     CONSTRAINT ck_usuario_cpf CHECK (LENGTH(cpf) = 11),
@@ -21,31 +21,22 @@ CREATE TABLE usuario (
     CONSTRAINT ck_usuario_email CHECK (
         LENGTH(email) >= 6
         AND email LIKE '%@%'
-    ),
-
-    -- Papel limitado a valores permitidos
-    CONSTRAINT ck_usuario_papel CHECK (
-        papel IN ('municipe', 'responsavel tecnico')
     )
-);
-
--- MUNÍCIPE (subtipo de usuario)
-CREATE TABLE municipe (
-    cpf VARCHAR(14) PRIMARY KEY REFERENCES usuario(cpf)
 );
 
 -- RESPONSÁVEL TÉCNICO (subtipo de usuario)
 CREATE TABLE responsavel_tecnico (
-    cpf VARCHAR(14) PRIMARY KEY REFERENCES usuario(cpf),
-    conselho_regional TEXT NOT NULL,
-    registro_profissional TEXT NOT NULL,
+    cpf VARCHAR(11) PRIMARY KEY REFERENCES usuario(cpf),
+    conselho_regional VARCHAR(20) NOT NULL,
+    registro_profissional VARCHAR(20) NOT NULL,
     UNIQUE(conselho_regional, registro_profissional)
 );
 
 -- EMPRESA TERCEIRIZADA
 CREATE TABLE empresa_terceirizada (
-    cnpj VARCHAR(20) PRIMARY KEY,
-    nome TEXT NOT NULL
+    cnpj VARCHAR(14) PRIMARY KEY,
+    nome VARCHAR(255) NOT NULL,
+    CONSTRAINT ck_empresa_terceirizada_cnpj CHECK (LENGTH(cnpj) = 14)
 );
 
 -- solicitacao
@@ -54,13 +45,13 @@ CREATE TABLE solicitacao (
     cpf_usuario CHAR(11) REFERENCES usuario(cpf),
     cpf_resp_tecnico CHAR(11) REFERENCES responsavel_tecnico(cpf),
     descricao TEXT,
-    bairro TEXT,
+    bairro VARCHAR(255),
     rua TEXT,
-    numero TEXT,
+    numero SMALLINT,
     data DATE,
     hora TIME,
     status VARCHAR(8),
-    CONSTRAINT check_status CHECK (status IN ('válida', 'inválida'))
+    CONSTRAINT check_status CHECK (status IN ('valida', 'invalida'))
 );
 
 -- FOTOS DA solicitacao
@@ -78,32 +69,27 @@ CREATE TABLE especie (
     nativa BOOLEAN                      -- Indica se a espécie é nativa (TRUE) ou exótica (FALSE)
 );
 
+-- TAG NFC
+CREATE TABLE tag (
+    codigo_nfc TEXT PRIMARY KEY
+);
+
 -- arvore
 CREATE TABLE arvore (
     id SERIAL PRIMARY KEY,
+    codigo_nfc TEXT REFERENCES tag(codigo_nfc),
     latitude NUMERIC NOT NULL,
     longitude NUMERIC NOT NULL,
     contador INTEGER NOT NULL,
     nome_cientifico TEXT REFERENCES especie(nome_cientifico),
     ultima_vistoria DATE,
     status TEXT,
-    tipo TEXT,
+    CONSTRAINT ck_arvore_status CHECK (status IN ('saudavel', 'doente', 'em risco', 'corte programado', 'cortada')),
+    tipo VARCHAR(10) CHECK (tipo IN ('publico', 'privado')),
     altura NUMERIC,
     dap NUMERIC,
     UNIQUE (latitude, longitude, contador),
-    CONSTRAINT ck_arvore_tipo CHECK (tipo IN ('público', 'privado'))
-);
-
-
--- TAG NFC
-CREATE TABLE tag (
-    codigo_nfc TEXT PRIMARY KEY,
-    latitude NUMERIC NOT NULL,
-    longitude NUMERIC NOT NULL,
-    contador INTEGER NOT NULL,
-    FOREIGN KEY (latitude, longitude, contador)
-        REFERENCES arvore(latitude, longitude, contador),
-    UNIQUE(latitude, longitude, contador)
+    UNIQUE (codigo_nfc)
 );
 
 

@@ -38,6 +38,11 @@
         color: #1f351f !important;
     }
 
+    .nav-link.active {
+        color: #6b8b6f !important;
+        opacity: 0.7;
+    }
+
     /* Card do formulário (igual ao estilo das telas de inclusão/edição) */
     .form-card {
         max-width: 450px;
@@ -95,11 +100,11 @@
     <ul class="navbar-nav">
       {% if session.usuario_logado %}
       <li class="nav-item">
-          <a class="nav-link" href="/clientes">Listagem Árvores</a>
+          <a class="nav-link" href="/arvores">Listagem de Árvores</a>
       </li>
 
       <li class="nav-item">
-          <a class="nav-link" href="/inclusaoClientes">Inclusão Clientes</a>
+          <a class="nav-link" href="/inclusaoArvores">Cadastro de Árvore</a>
       </li>
 
       <li class="nav-item">
@@ -154,25 +159,38 @@
 <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.1.3/js/bootstrap.min.js"></script>
 
 <script>
-document.querySelector("form").addEventListener("submit", function(event) {
-    const email = document.getElementById("login").value.trim();
-    const senha = document.getElementById("senha").value;
+    // Destacar o link da página atual
+    (function() {
+        const currentPath = window.location.pathname;
+        const navLinks = document.querySelectorAll('.nav-link');
+        
+        navLinks.forEach(link => {
+            const href = link.getAttribute('href');
+            if (href && (currentPath === href || currentPath.startsWith(href + '/'))) {
+                link.classList.add('active');
+            }
+        });
+    })();
 
-    // Regex simples para validar email
-    const emailValido = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
+    document.querySelector("form").addEventListener("submit", function(event) {
+        const email = document.getElementById("login").value.trim();
+        const senha = document.getElementById("senha").value;
 
-    if (!emailValido) {
-        event.preventDefault();
-        alert("Por favor, digite um email válido.");
-        return;
-    }
+        // Regex simples para validar email
+        const emailValido = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
 
-    if (senha.length < 8) {
-        event.preventDefault();
-        alert("A senha deve ter pelo menos 8 caracteres.");
-        return;
-    }
-});
+        if (!emailValido) {
+            event.preventDefault();
+            alert("Por favor, digite um email válido.");
+            return;
+        }
+
+        if (senha.length < 8) {
+            event.preventDefault();
+            alert("A senha deve ter pelo menos 8 caracteres.");
+            return;
+        }
+    });
 </script>
 
 

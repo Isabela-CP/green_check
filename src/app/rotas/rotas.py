@@ -23,41 +23,35 @@ def rotas(aplicacao):
         print('Acessou a pagina de ACESSO a aplicacao...')
         return render_template('login.html')
 
-    @aplicacao.route('/clientes')
+    @aplicacao.route('/arvores')
     @login_required
-    def clientes():
-        return cliente_cont.lista_cliente()()
+    def arvores():
+        return cliente_cont.lista_arvore()()
 
-    @aplicacao.route('/inclusaoClientes')
+    @aplicacao.route('/inclusaoArvores')
     @login_required
-    def inclusao_clientes():
-        return cliente_cont.exibe_form_inclusao_cliente()()
-
-    @aplicacao.route('/listaDadosClientes/<int:id>')
-    @login_required
-    def lista_dados_clientes(id):
-        return cliente_cont.lista_dados_cliente()(id)
+    def inclusao_arvores():
+        return cliente_cont.exibe_form_inclusao_arvore()()
     
     @aplicacao.route('/consulta')
     @login_required
     def consulta():
         return cliente_cont.select_arvores_por_status()()
 
-    @aplicacao.route('/removeCliente/<int:id>')
-    @login_required
-    def remove_cliente(id):
-        return cliente_cont.exclui_cliente()(id)
-
     @aplicacao.route('/validaBDUsuarios', methods=['POST'])
     def valida_bd_usuarios():
         return usuario_cont.valida_acesso_usuario()()
 
-    @aplicacao.route('/insertBDClientes', methods=['POST'])
+    @aplicacao.route('/insertBDArvores', methods=['POST'])
     @login_required
-    def insert_bd_clientes():
-        return cliente_cont.insere_novo_cliente()()
+    def insert_bd_arvores():
+        return cliente_cont.insere_nova_arvore()()
 
     @aplicacao.route('/logout')
     def logout():
-        session.pop("usuario_logado", None)
-        return redirect("/")
+        """Faz logout do usuário, limpando sessão e cookie"""
+        session.clear()
+        response = redirect("/")
+        # Remove o cookie de autenticação
+        response.set_cookie('auth_token', '', expires=0)
+        return response

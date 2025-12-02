@@ -2,7 +2,7 @@ class Clientes_dao:
     def __init__(self, db_pool):
         self._db_pool = db_pool
 
-    # LISTAR TODAS AS ÁRVORES (para /clientes)
+    # LISTAR TODAS AS ÁRVORES (para /arvores)
     def select_na_tabela_clientes(self):
         sql = """
             SELECT
@@ -52,12 +52,11 @@ class Clientes_dao:
             longitude = dados.get("longitude")
             codigo_tag = dados.get("codigo_tag")  # pode vir None
 
-            # 1) BUSCAR REGISTROS EXISTENTES
+            # 1) BUSCAR REGISTROS EXISTENTES na mesma localização
             cursor.execute(
                 """
                 SELECT contador, status 
-                FROM tag
-                JOIN arvore USING(latitude, longitude, contador)
+                FROM arvore
                 WHERE latitude = %s AND longitude = %s
                 ORDER BY contador ASC
             """,
@@ -84,17 +83,27 @@ class Clientes_dao:
                     # existe árvore ativa → contador volta para 1
                     contador = 1
 
-            # 3) INSERIR ÁRVORE
+            # 3) INSERIR TAG (SE TIVER) - Deve ser inserida ANTES da árvore
+            if dados.get("tem_tag") and codigo_tag:
+                sql_tag = """
+                    INSERT INTO tag (codigo_nfc)
+                    VALUES (%s)
+                    ON CONFLICT (codigo_nfc) DO NOTHING
+                """
+                cursor.execute(sql_tag, (codigo_tag,))
+
+            # 4) INSERIR ÁRVORE
             sql_arvore = """
                 INSERT INTO arvore
-                    (latitude, longitude, contador, nome_cientifico, ultima_vistoria, status, tipo, altura, dap)
+                    (codigo_nfc, latitude, longitude, contador, nome_cientifico, ultima_vistoria, status, tipo, altura, dap)
                 VALUES
-                    (%s, %s, %s, %s, %s, %s, %s, %s, %s)
+                    (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
             """
 
             cursor.execute(
                 sql_arvore,
                 (
+                    codigo_tag if dados.get("tem_tag") and codigo_tag else None,
                     latitude,
                     longitude,
                     contador,
@@ -107,14 +116,6 @@ class Clientes_dao:
                 ),
             )
 
-            # 4) INSERIR TAG (SE TIVER)
-            if dados.get("tem_tag") and codigo_tag:
-                sql_tag = """
-                    INSERT INTO tag (codigo_nfc, latitude, longitude, contador)
-                    VALUES (%s, %s, %s, %s)
-                """
-                cursor.execute(sql_tag, (codigo_tag, latitude, longitude, contador))
-
             # FINALIZA
             conn.commit()
             cursor.close()
@@ -124,80 +125,61 @@ class Clientes_dao:
             if conn:
                 conn.rollback()
             print(f"Erro ao inserir árvore: {erro}")
-            return erro
+            
+            # Tratar erros específicos e retornar mensagens amigáveis
+            erro_str = str(erro)
+            
+            # Erro de chave duplicada (árvore já existe na mesma localização)
+            if "duplicate key value violates unique constraint" in erro_str and "arvore_latitude_longitude_contador_key" in erro_str:
+                return "Já existe uma árvore cadastrada nesta localização (latitude e longitude). Por favor, verifique as coordenadas ou aguarde a remoção da árvore existente."
+            
+            # Erro de foreign key (tag não existe)
+            if "violates foreign key constraint" in erro_str and "tag" in erro_str:
+                return "O código da TAG informado não existe no sistema. Por favor, verifique o código ou cadastre a TAG primeiro."
+            
+            # Erro genérico
+            return f"Erro ao cadastrar árvore: {erro_str}"
 
         finally:
             if conn:
                 self._db_pool.putconn(conn)
 
-    # EXCLUIR ÁRVORE
-    def exclui_clientes(self, id_arvore):
-        sql = """
-            DELETE FROM arvore
-            WHERE "id" = %s
-        """
-        values = (id_arvore,)
-
-        print("DELETE ARVORE =", sql, values)
-
-        conn = None
-        try:
-            conn = self._db_pool.getconn()
-            cursor = conn.cursor()
-            cursor.execute(sql, values)
-            conn.commit()
-            cursor.close()
-            return None
-        except Exception as erro:
-            if conn:
-                conn.rollback()
-            print(f"Erro ao excluir árvore: {erro}")
-            return erro
-        finally:
-            if conn:
-                self._db_pool.putconn(conn)
-
-    # CONSULTAR ÁRVORE POR ID
-    def consulta_cliente_por_id(self, id_arvore):
-        sql = """
-            SELECT
-                "id",
-                "latitude",
-                "longitude",
-                "status",
-                "tipo",
-                "altura",
-                "dap",
-                "ultima_vistoria",
-                "nome_cientifico"
-            FROM arvore
-            WHERE "id" = %s
-        """
-        values = (id_arvore,)
-
-        print("SELECT ARVORE POR ID =", sql, values)
-
-        conn = None
-        try:
-            conn = self._db_pool.getconn()
-            cursor = conn.cursor()
-            cursor.execute(sql, values)
-            resultado = cursor.fetchone()
-
-            if resultado:
-                colunas = [desc[0] for desc in cursor.description]
-                arvore = dict(zip(colunas, resultado))
-                cursor.close()
-                return None, [arvore]
-            else:
-                cursor.close()
-                return None, []
-        except Exception as erro:
-            print(f"Erro em consulta_cliente_por_id (arvore): {erro}")
-            return erro, []
-        finally:
-            if conn:
-                self._db_pool.putconn(conn)
+    # EXCLUIR ÁRVORE - DESABILITADO
+    # A remoção de árvores foi desabilitada devido a conflitos de foreign key.
+    # Árvores não podem ser removidas quando possuem vistorias associadas,
+    # pois isso violaria a integridade referencial do banco de dados.
+    # 
+    # Se for necessário remover uma árvore, primeiro é preciso:
+    # 1. Remover todas as vistorias associadas
+    # 2. Remover todas as manutenções associadas
+    # 3. Remover todas as solicitações associadas
+    # 4. Então remover a árvore
+    #
+    # def exclui_clientes(self, id_arvore):
+    #     sql = """
+    #         DELETE FROM arvore
+    #         WHERE "id" = %s
+    #     """
+    #     values = (id_arvore,)
+    #
+    #     print("DELETE ARVORE =", sql, values)
+    #
+    #     conn = None
+    #     try:
+    #         conn = self._db_pool.getconn()
+    #         cursor = conn.cursor()
+    #         cursor.execute(sql, values)
+    #         conn.commit()
+    #         cursor.close()
+    #         return None
+    #     except Exception as erro:
+    #         if conn:
+    #             conn.rollback()
+    #         print(f"Erro ao excluir árvore: {erro}")
+    #         return erro
+    #     finally:
+    #         if conn:
+    #             self._db_pool.putconn(conn)
 
     def select_arvores_por_status(self, status):
         sql = """

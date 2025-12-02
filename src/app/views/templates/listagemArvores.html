@@ -42,6 +42,11 @@
       color: #1f351f !important;
     }
 
+    .nav-link.active {
+      color: #6b8b6f !important;
+      opacity: 0.7;
+    }
+
     /* Tabela estilizada */
     table {
       background-color: #F4FBF2;
@@ -97,11 +102,11 @@
       <ul class="navbar-nav">
         {% if session.usuario_logado %}
         <li class="nav-item">
-          <a class="nav-link" href="/clientes">Listagem Árvores</a>
+          <a class="nav-link" href="/arvores">Listagem de Árvores</a>
         </li>
 
         <li class="nav-item">
-          <a class="nav-link" href="/inclusaoClientes">Inclusão Clientes</a>
+          <a class="nav-link" href="/inclusaoArvores">Cadastro de Árvore</a>
         </li>
 
         <li class="nav-item">
@@ -140,34 +145,28 @@
           <th>Altura (m)</th>
           <th>DAP (cm)</th>
           <th>Última Vistoria</th>
-          <th>Remover</th>
         </tr>
       </thead>
 
       <tbody>
-        {% for arvore in clientes %}
+        {% for arvore in arvores %}
         <tr>
           <td>{{ arvore.id }}</td>
           <td>{{ arvore.latitude }}</td>
           <td>{{ arvore.longitude }}</td>
-          <td style="font-weight: bold;
-            {% if arvore.status == 'Saudável' %}color:green;
-            {% elif arvore.status == 'Doente' %}color:orange;
-            {% elif arvore.status == 'Em Risco' %}color:red;
-            {% elif arvore.status == 'Cortada' %}color:gray;
-            {% endif %}">
-            {{ arvore.status }}
+          <td class="font-weight-bold {% if arvore.status == 'saudavel' %}text-success{% elif arvore.status == 'doente' %}text-warning{% elif arvore.status == 'em risco' %}text-danger{% elif arvore.status == 'cortada' %}text-secondary{% elif arvore.status == 'corte programado' %}text-info{% endif %}">
+            {% if arvore.status == 'saudavel' %}Saudável
+            {% elif arvore.status == 'doente' %}Doente
+            {% elif arvore.status == 'em risco' %}Em Risco
+            {% elif arvore.status == 'cortada' %}Cortada
+            {% elif arvore.status == 'corte programado' %}Corte Programado
+            {% else %}{{ arvore.status }}{% endif %}
           </td>
           <td>{{ arvore.tipo }}</td>
           <td>{{ arvore.nome_cientifico or '-' }}</td>
           <td>{{ arvore.altura }}</td>
           <td>{{ arvore.dap }}</td>
           <td>{{ arvore.ultima_vistoria or '-' }}</td>
-
-          <td>
-            <i class="fa-solid fa-trash"></i>
-            <a href="/removeCliente/{{ arvore.id }}">Remover</a>
-          </td>
         </tr>
         {% endfor %}
       </tbody>
@@ -179,6 +178,22 @@
   <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.3/umd/popper.min.js"></script>
   <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.1.3/js/bootstrap.min.js"></script>
 
+  <script>
+    // Destacar o link da página atual
+    (function() {
+      const currentPath = window.location.pathname;
+      const navLinks = document.querySelectorAll('.nav-link');
+      
+      navLinks.forEach(link => {
+        const href = link.getAttribute('href');
+        if (href && (currentPath === href || currentPath.startsWith(href + '/'))) {
+          link.classList.add('active');
+        }
+      });
+    })();
+  </script>
+
 </body>
 
 </html>
+

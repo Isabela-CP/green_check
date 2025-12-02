@@ -202,19 +202,34 @@ docker compose up -d --build
 - **Jinja2**: Engine de templates (integrado ao Flask)
 - **psycopg2**: Driver PostgreSQL para Python
 - **PostgreSQL**: Banco de dados
+- **bcrypt**: Hash seguro de senhas
+- **itsdangerous**: Geração e validação de tokens seguros
 - **Bootstrap**: Framework CSS (via CDN)
 - **Docker**: Containerização da aplicação
 - **Docker Compose**: Orquestração de serviços
 
 
+## Sistema de Autenticação
+
+O sistema implementa autenticação segura com:
+- **Senhas encriptadas**: Usando bcrypt com hash seguro
+- **Tokens de autenticação**: Armazenados em cookies HTTP-only
+- **Validação dupla**: Sessão + token em cada requisição
+- **Proteção XSS/CSRF**: Cookies configurados com flags de segurança
+
+Para mais detalhes, consulte [AUTENTICACAO.md](AUTENTICACAO.md).
+
+**NOTA**: Todas as senhas no arquivo `db/init/02_dados.sql` já estão com hash bcrypt.
+
 ## Rotas Disponíveis
 
 - `GET /` - Página de login
-- `GET /clientes` - Listagem de árvores
-- `GET /inclusaoClientes` - Formulário de inclusão
+- `GET /arvores` - Listagem de árvores (requer autenticação)
+- `GET /inclusaoArvores` - Formulário de cadastro de árvore (requer autenticação)
 - `POST /validaBDUsuarios` - Validação de login
-- `POST /insertBDClientes` - Inserção de nova árvore
-- `GET /listaDadosClientes/<id>` - Edição de árvore
-- `POST /updateBDCliente` - Atualização de árvore
-- `GET /removeCliente/<id>` - Remoção de árvore
+- `POST /insertBDArvores` - Inserção de nova árvore (requer autenticação)
+- `GET /consulta` - Consulta de árvores por status (requer autenticação)
+- `GET /logout` - Logout do usuário
+
+**Nota:** A funcionalidade de remoção de árvores foi desabilitada devido a restrições de integridade referencial. Árvores com vistorias associadas não podem ser removidas diretamente.
 

@@ -2,7 +2,7 @@
 <html>
 
 <head>
-    <title>Inclusão de Árvore - Green Check</title>
+    <title>Cadastro de Árvore - Green Check</title>
 
     <!-- Bootstrap -->
     <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.1.3/css/bootstrap.min.css">
@@ -39,6 +39,11 @@
 
         .nav-link:hover {
             color: #1f351f !important;
+        }
+
+        .nav-link.active {
+            color: #6b8b6f !important;
+            opacity: 0.7;
         }
 
         /* Card */
@@ -99,11 +104,11 @@
             <ul class="navbar-nav">
                 {% if session.usuario_logado %}
                 <li class="nav-item">
-                    <a class="nav-link" href="/clientes">Listagem Árvores</a>
+                    <a class="nav-link" href="/arvores">Listagem de Árvores</a>
                 </li>
 
                 <li class="nav-item">
-                    <a class="nav-link" href="/inclusaoClientes">Inclusão Clientes</a>
+                    <a class="nav-link" href="/inclusaoArvores">Cadastro de Árvore</a>
                 </li>
 
                 <li class="nav-item">
@@ -125,13 +130,22 @@
 
 
     <!-- TÍTULO -->
-    <h1> Cadastro de uma árvore</h1>
+    <h1>Cadastro de Árvore</h1>
 
     {% with messages = get_flashed_messages(with_categories=true) %}
     {% if messages %}
-    <div class="container mt-3">
+    <div class="container mt-3" style="max-width: 550px;">
         {% for category, message in messages %}
-        <div class="alert alert-{{ category }} alert-dismissible fade show" role="alert">
+        <div class="alert alert-{{ category }} alert-dismissible fade show" role="alert" style="margin-bottom: 20px; border-radius: 8px;">
+            <strong>
+                {% if category == 'danger' %}
+                    Erro:
+                {% elif category == 'success' %}
+                    Sucesso:
+                {% else %}
+                    Informação:
+                {% endif %}
+            </strong>
             {{ message }}
             <button type="button" class="close" data-dismiss="alert" aria-label="Close">
                 <span aria-hidden="true">&times;</span>
@@ -145,7 +159,7 @@
     <!-- FORMULÁRIO -->
     <div class="form-card">
 
-        <form action="/insertBDClientes" method="post">
+        <form action="/insertBDArvores" method="post">
 
             <input type="hidden" id="id" name="id" />
 
@@ -162,18 +176,18 @@
             <div class="form-group">
                 <label for="status">Status:</label>
                 <select id="status" name="status" class="form-control">
-                    <option value="Saudável">Saudável</option>
-                    <option value="Doente">Doente</option>
-                    <option value="Em Risco">Em Risco</option>
-                    <option value="Corte Programado">Corte Programado</option>
-                    <option value="Cortada">Cortada</option>
+                    <option value="saudavel">Saudável</option>
+                    <option value="doente">Doente</option>
+                    <option value="em risco">Em Risco</option>
+                    <option value="corte programado">Corte Programado</option>
+                    <option value="cortada">Cortada</option>
                 </select>
             </div>
 
             <div class="form-group">
                 <label for="tipo">Tipo:</label>
                 <select id="tipo" name="tipo" class="form-control">
-                    <option value="público">Pública</option>
+                    <option value="publico">Pública</option>
                     <option value="privado">Privada</option>
                 </select>
             </div>
@@ -212,7 +226,7 @@
                 <input type="date" class="form-control" id="data_ultima_vistoria" name="data_ultima_vistoria">
             </div>
 
-            <button type="submit" class="btn btn-success">Inserir Dados</button>
+            <button type="submit" class="btn btn-success">Cadastrar Árvore</button>
 
         </form>
     </div>
@@ -224,6 +238,21 @@
     <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.1.3/js/bootstrap.min.js"></script>
 
     <script>
+        // Destacar o link da página atual
+        (function() {
+            const currentPath = window.location.pathname;
+            const navLinks = document.querySelectorAll('.nav-link');
+            
+            navLinks.forEach(link => {
+                const href = link.getAttribute('href');
+                if (href && (currentPath === href || currentPath.startsWith(href + '/'))) {
+                    link.classList.add('active');
+                }
+            });
+        })();
+    </script>
+
+    <script>
         document.getElementById("tem_tag").addEventListener("change", function () {
             const campoTag = document.getElementById("campo_tag");
             if (this.checked) {
@@ -233,8 +262,71 @@
                 document.getElementById("codigo_tag").value = "";
             }
         });
+
+        // Validação do formulário baseada nas constraints do esquema
+        document.querySelector("form").addEventListener("submit", function(event) {
+            const latitude = document.getElementById("latitude").value.trim();
+            const longitude = document.getElementById("longitude").value.trim();
+            const tipo = document.getElementById("tipo").value;
+            const altura = document.getElementById("altura_m").value.trim();
+            const dap = document.getElementById("dap_cm").value.trim();
+            const nomeCientifico = document.getElementById("nome_cientifico").value.trim();
+
+            // Validar latitude (obrigatória e numérica)
+            if (!latitude) {
+                event.preventDefault();
+                alert("Latitude é obrigatória.");
+                return;
+            }
+            if (isNaN(latitude) || parseFloat(latitude) < -90 || parseFloat(latitude) > 90) {
+                event.preventDefault();
+                alert("Latitude deve ser um número válido entre -90 e 90.");
+                return;
+            }
+
+            // Validar longitude (obrigatória e numérica)
+            if (!longitude) {
+                event.preventDefault();
+                alert("Longitude é obrigatória.");
+                return;
+            }
+            if (isNaN(longitude) || parseFloat(longitude) < -180 || parseFloat(longitude) > 180) {
+                event.preventDefault();
+                alert("Longitude deve ser um número válido entre -180 e 180.");
+                return;
+            }
+
+            // Validar tipo (deve ser 'publico' ou 'privado')
+            if (tipo !== 'publico' && tipo !== 'privado') {
+                event.preventDefault();
+                alert("Tipo deve ser 'publico' ou 'privado'.");
+                return;
+            }
+
+            // Validar altura se preenchida (deve ser numérica e positiva)
+            if (altura && (isNaN(altura) || parseFloat(altura) < 0)) {
+                event.preventDefault();
+                alert("Altura deve ser um número positivo ou deixe em branco.");
+                return;
+            }
+
+            // Validar DAP se preenchido (deve ser numérico e positivo)
+            if (dap && (isNaN(dap) || parseFloat(dap) < 0)) {
+                event.preventDefault();
+                alert("DAP deve ser um número positivo ou deixe em branco.");
+                return;
+            }
+
+            // Validar nome científico se preenchido (não pode estar vazio se informado)
+            if (nomeCientifico && nomeCientifico.length === 0) {
+                event.preventDefault();
+                alert("Nome científico não pode estar vazio se informado.");
+                return;
+            }
+        });
     </script>
 
 </body>
 
 </html>
+

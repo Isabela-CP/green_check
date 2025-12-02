@@ -82,7 +82,7 @@ ORDER BY data_vistoria DESC;
 -- e alocação de recursos.
 --
 -- Explicação:
--- Busca solicitações com status 'válida' que possuem vistoria inicial,
+-- Busca solicitações com status 'valida' que possuem vistoria inicial,
 -- mas não possuem nenhuma manutenção associada. Agrupa os resultados por
 -- bairro e conta quantas solicitações atendem a esses critérios em cada
 -- bairro, ordenando por quantidade decrescente.
@@ -100,7 +100,7 @@ ORDER BY data_vistoria DESC;
 -- Campos utilizados:
 -- - solicitacao.codigo: Identificador único da solicitação
 -- - solicitacao.bairro: Bairro onde a solicitação foi feita
--- - solicitacao.status: Status da solicitação (deve ser 'válida')
+-- - solicitacao.status: Status da solicitação (deve ser 'valida')
 -- - vistoria_inicial.cod_solicitacao: Relaciona vistoria com solicitação
 -- - manutencao.cod_solicitacao: Relaciona manutenção com vistoria/solicitação
 --
@@ -115,7 +115,7 @@ SELECT
 FROM solicitacao s
 LEFT JOIN vistoria_inicial v ON v.cod_solicitacao = s.codigo
 LEFT JOIN manutencao m ON m.cod_solicitacao = v.cod_solicitacao
-WHERE s.status = 'válida'
+WHERE s.status = 'valida'
   AND m.cod_solicitacao IS NULL
 GROUP BY s.bairro
 HAVING COUNT(DISTINCT s.codigo) > 0
@@ -179,7 +179,7 @@ ORDER BY solicitacoes_abertas_sem_manutencao DESC;
 -- 1. A consulta usa 'remocao' como equivalente a 'corte', pois 'corte' não
 --    existe no banco de dados atual.
 -- 2. É necessário fazer JOIN com a tabela especie para verificar se uma
---    espécie é nativa, pois arvore.tipo indica apenas se é 'público' ou
+--    espécie é nativa, pois arvore.tipo indica apenas se é 'publico' ou
 --    'privado', não se a espécie é nativa.
 -- 3. A consulta retornará apenas empresas que atenderam TODAS as espécies
 --    nativas que tiveram risco alto (divisão relacional completa).
