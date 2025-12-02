@@ -131,21 +131,20 @@ CREATE TABLE vistoria_inicial (
 -- manutencao
 
 CREATE TABLE manutencao (
-    tipo TEXT,
+    tipo VARCHAR(20) CHECK (tipo IN ('poda', 'remocao', 'tratamento')),
     cod_solicitacao INTEGER REFERENCES vistoria_inicial(cod_solicitacao),
     laudo TEXT,
     cnpj VARCHAR(20) REFERENCES empresa_terceirizada(cnpj),
     tipo_contrato TEXT,
     prazo TEXT,
     cpf_resp_tecnico CHAR(11) REFERENCES responsavel_tecnico(cpf),
-    PRIMARY KEY (cod_solicitacao, tipo),
-    CONSTRAINT ck_manutencao_tipo CHECK (tipo IN ('poda', 'remocao', 'tratamento'))
+    PRIMARY KEY (cod_solicitacao, tipo)
 );
 
 -- FOTOS DA manutencao
 CREATE TABLE foto_manutencao (
     cod_solicitacao INTEGER,
-    tipo TEXT,
+    tipo VARCHAR(20),
     caminho_foto TEXT NOT NULL,
     PRIMARY KEY (cod_solicitacao, tipo, caminho_foto),
     FOREIGN KEY (cod_solicitacao, tipo)
@@ -154,12 +153,11 @@ CREATE TABLE foto_manutencao (
 
 -- COMPENSAÇÃO AMBIENTAL
 CREATE TABLE compensacao_ambiental (
-    tipo TEXT,
+    tipo VARCHAR(20),
     cod_solicitacao INTEGER,
     num_mudas INTEGER,
-    status TEXT,
+    status VARCHAR(10) CHECK (status IN ('em aberto', 'finalizada')),
     PRIMARY KEY (tipo, cod_solicitacao),
     FOREIGN KEY (cod_solicitacao, tipo)
-        REFERENCES manutencao(cod_solicitacao, tipo),
-    CONSTRAINT check_status_ambiental CHECK (status IN ('em aberto', 'finalizada'))
+        REFERENCES manutencao(cod_solicitacao, tipo)
 );
