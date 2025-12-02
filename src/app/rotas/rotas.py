@@ -47,6 +47,16 @@ def rotas(aplicacao):
     def insert_bd_arvores():
         return cliente_cont.insere_nova_arvore()()
 
+    @aplicacao.route('/inclusaoEspecies')
+    @login_required
+    def inclusao_especies():
+        return cliente_cont.exibe_form_inclusao_especie()()
+
+    @aplicacao.route('/insertBDEspecies', methods=['POST'])
+    @login_required
+    def insert_bd_especies():
+        return cliente_cont.insere_nova_especie()()
+
     @aplicacao.route('/logout')
     def logout():
         """Faz logout do usuário, limpando sessão e cookie"""

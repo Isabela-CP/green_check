@@ -2,7 +2,7 @@
 <html>
 
 <head>
-    <title>Cadastro de Árvore - Green Check</title>
+    <title>Cadastro de Espécie - Green Check</title>
 
     <!-- Bootstrap -->
     <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.1.3/css/bootstrap.min.css">
@@ -134,7 +134,7 @@
 
 
     <!-- TÍTULO -->
-    <h1>Cadastro de Árvore</h1>
+    <h1>Cadastro de Espécie</h1>
 
     {% with messages = get_flashed_messages(with_categories=true) %}
     {% if messages %}
@@ -163,74 +163,30 @@
     <!-- FORMULÁRIO -->
     <div class="form-card">
 
-        <form action="/insertBDArvores" method="post">
-
-            <input type="hidden" id="id" name="id" />
+        <form action="/insertBDEspecies" method="post">
 
             <div class="form-group">
-                <label for="latitude">Latitude:</label>
-                <input type="text" class="form-control" id="latitude" name="latitude">
+                <label for="nome_cientifico">Nome Científico: <span class="text-danger">*</span></label>
+                <input type="text" class="form-control" id="nome_cientifico" name="nome_cientifico" required>
+                <small class="form-text text-muted">Exemplo: Handroanthus impetiginosus</small>
             </div>
 
             <div class="form-group">
-                <label for="longitude">Longitude:</label>
-                <input type="text" class="form-control" id="longitude" name="longitude">
+                <label for="nome_popular">Nome Popular:</label>
+                <input type="text" class="form-control" id="nome_popular" name="nome_popular">
+                <small class="form-text text-muted">Exemplo: Ipê-roxo</small>
             </div>
 
             <div class="form-group">
-                <label for="status">Status:</label>
-                <select id="status" name="status" class="form-control">
-                    <option value="saudavel">Saudável</option>
-                    <option value="doente">Doente</option>
-                    <option value="em risco">Em Risco</option>
-                    <option value="corte programado">Corte Programado</option>
-                    <option value="cortada">Cortada</option>
+                <label for="nativa">É uma espécie nativa? <span class="text-danger">*</span></label>
+                <select id="nativa" name="nativa" class="form-control" required>
+                    <option value="">Selecione...</option>
+                    <option value="true">Sim (Nativa)</option>
+                    <option value="false">Não (Exótica)</option>
                 </select>
             </div>
 
-            <div class="form-group">
-                <label for="tipo">Tipo:</label>
-                <select id="tipo" name="tipo" class="form-control">
-                    <option value="publico">Pública</option>
-                    <option value="privado">Privada</option>
-                </select>
-            </div>
-
-            <div class="form-group">
-                <label for="altura_m">Altura (m):</label>
-                <input type="text" class="form-control" id="altura_m" name="altura_m">
-            </div>
-
-            <div class="form-group">
-                <label for="dap_cm">DAP (cm):</label>
-                <input type="text" class="form-control" id="dap_cm" name="dap_cm">
-            </div>
-
-            <!-- NOVO CAMPO: NOME CIENTÍFICO -->
-            <div class="form-group">
-                <label for="nome_cientifico">Nome Científico:</label>
-                <input type="text" class="form-control" id="nome_cientifico" name="nome_cientifico">
-            </div>
-
-            <!-- CAMPO: POSSUI TAG? -->
-            <div class="form-group">
-                <label><strong>Possui TAG?</strong></label><br>
-                <input type="checkbox" id="tem_tag" name="tem_tag">
-                <label for="tem_tag">Sim</label>
-            </div>
-
-            <!-- CAMPO: CÓDIGO DA TAG -->
-            <div class="form-group" id="campo_tag" style="display: none;">
-                <label for="codigo_tag">Código da TAG:</label>
-                <input type="text" class="form-control" id="codigo_tag" name="codigo_tag">
-            </div>
-
-            <div class="form-group">
-                <label for="data_ultima_vistoria">Data da última vistoria:</label>
-                <input type="date" class="form-control" id="data_ultima_vistoria" name="data_ultima_vistoria">
-            </div>
-
-            <button type="submit" class="btn btn-success">Cadastrar Árvore</button>
+            <button type="submit" class="btn btn-success">Cadastrar Espécie</button>
 
         </form>
     </div>
@@ -254,77 +210,23 @@
                 }
             });
         })();
-    </script>
 
-    <script>
-        document.getElementById("tem_tag").addEventListener("change", function () {
-            const campoTag = document.getElementById("campo_tag");
-            if (this.checked) {
-                campoTag.style.display = "block";
-            } else {
-                campoTag.style.display = "none";
-                document.getElementById("codigo_tag").value = "";
-            }
-        });
-
-        // Validação do formulário baseada nas constraints do esquema
+        // Validação do formulário
         document.querySelector("form").addEventListener("submit", function(event) {
-            const latitude = document.getElementById("latitude").value.trim();
-            const longitude = document.getElementById("longitude").value.trim();
-            const tipo = document.getElementById("tipo").value;
-            const altura = document.getElementById("altura_m").value.trim();
-            const dap = document.getElementById("dap_cm").value.trim();
             const nomeCientifico = document.getElementById("nome_cientifico").value.trim();
+            const nativa = document.getElementById("nativa").value;
 
-            // Validar latitude (obrigatória e numérica)
-            if (!latitude) {
+            // Validar nome científico (obrigatório)
+            if (!nomeCientifico) {
                 event.preventDefault();
-                alert("Latitude é obrigatória.");
-                return;
-            }
-            if (isNaN(latitude) || parseFloat(latitude) < -90 || parseFloat(latitude) > 90) {
-                event.preventDefault();
-                alert("Latitude deve ser um número válido entre -90 e 90.");
+                alert("Nome científico é obrigatório.");
                 return;
             }
 
-            // Validar longitude (obrigatória e numérica)
-            if (!longitude) {
+            // Validar se é nativa (obrigatório)
+            if (!nativa) {
                 event.preventDefault();
-                alert("Longitude é obrigatória.");
-                return;
-            }
-            if (isNaN(longitude) || parseFloat(longitude) < -180 || parseFloat(longitude) > 180) {
-                event.preventDefault();
-                alert("Longitude deve ser um número válido entre -180 e 180.");
-                return;
-            }
-
-            // Validar tipo (deve ser 'publico' ou 'privado')
-            if (tipo !== 'publico' && tipo !== 'privado') {
-                event.preventDefault();
-                alert("Tipo deve ser 'publico' ou 'privado'.");
-                return;
-            }
-
-            // Validar altura se preenchida (deve ser numérica e positiva)
-            if (altura && (isNaN(altura) || parseFloat(altura) < 0)) {
-                event.preventDefault();
-                alert("Altura deve ser um número positivo ou deixe em branco.");
-                return;
-            }
-
-            // Validar DAP se preenchido (deve ser numérico e positivo)
-            if (dap && (isNaN(dap) || parseFloat(dap) < 0)) {
-                event.preventDefault();
-                alert("DAP deve ser um número positivo ou deixe em branco.");
-                return;
-            }
-
-            // Validar nome científico se preenchido (não pode estar vazio se informado)
-            if (nomeCientifico && nomeCientifico.length === 0) {
-                event.preventDefault();
-                alert("Nome científico não pode estar vazio se informado.");
+                alert("Por favor, informe se a espécie é nativa ou exótica.");
                 return;
             }
         });

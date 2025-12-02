@@ -37,3 +37,22 @@ class ClientesControllers:
             erro, resultados = cliente_dao.select_arvores_por_status(status)
             return render_template('consulta.html', arvores=resultados, status_selecionado=status)
         return view
+
+    def exibe_form_inclusao_especie(self):
+        def view():
+            return render_template('inclusaoEspecies.html')
+        return view
+
+    def insere_nova_especie(self):
+        def view():
+            cliente_dao = Clientes_dao(connection_pool)
+            erro = cliente_dao.inclui_especie(request.form)
+            if erro:
+                # Exibe mensagem de erro amigável sem redirecionar
+                flash(erro, 'danger')
+                # Retorna o template de inclusão novamente com os dados do formulário
+                return render_template('inclusaoEspecies.html')
+            # Sucesso: redireciona para listagem com mensagem de sucesso
+            flash('Espécie cadastrada com sucesso!', 'success')
+            return redirect('/inclusaoEspecies')
+        return view

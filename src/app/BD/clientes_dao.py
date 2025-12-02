@@ -225,3 +225,60 @@ class Clientes_dao:
         finally:
             if conn:
                 self._db_pool.putconn(conn)
+
+    # INSERIR NOVA ESPÉCIE
+    def inclui_especie(self, dados):
+        conn = None
+        try:
+            conn = self._db_pool.getconn()
+            cursor = conn.cursor()
+
+            nome_cientifico = dados.get("nome_cientifico")
+            nome_popular = dados.get("nome_popular") or None
+            nativa_str = dados.get("nativa")
+            
+            # Converter string para boolean
+            nativa = nativa_str.lower() == "true" if nativa_str else None
+
+            # Validar nome científico (obrigatório)
+            if not nome_cientifico:
+                return "Nome científico é obrigatório."
+
+            # Validar nativa (obrigatório)
+            if nativa is None:
+                return "É necessário informar se a espécie é nativa ou exótica."
+
+            # Inserir espécie
+            sql_especie = """
+                INSERT INTO especie (nome_cientifico, nome_popular, nativa)
+                VALUES (%s, %s, %s)
+            """
+
+            cursor.execute(
+                sql_especie,
+                (nome_cientifico, nome_popular, nativa)
+            )
+
+            # Finalizar
+            conn.commit()
+            cursor.close()
+            return None
+
+        except Exception as erro:
+            if conn:
+                conn.rollback()
+            print(f"Erro ao inserir espécie: {erro}")
+            
+            # Tratar erros específicos e retornar mensagens amigáveis
+            erro_str = str(erro)
+            
+            # Erro de chave duplicada (espécie já existe)
+            if "duplicate key value violates unique constraint" in erro_str or "violates unique constraint" in erro_str:
+                return f"A espécie com nome científico '{nome_cientifico}' já está cadastrada no sistema."
+            
+            # Erro genérico
+            return f"Erro ao cadastrar espécie: {erro_str}"
+
+        finally:
+            if conn:
+                self._db_pool.putconn(conn)
