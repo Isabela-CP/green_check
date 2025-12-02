@@ -8,7 +8,9 @@ class ClientesControllers:
         def view():
             cliente_dao = Clientes_dao(connection_pool)
             erro, resultados = cliente_dao.select_na_tabela_clientes()
-            return render_template('listagemArvores.html', arvores=resultados)
+            if erro:
+                flash(str(erro), 'danger')
+            return render_template('listagemArvores.html', arvores=resultados if not erro else [])
         return view
 
     def exibe_form_inclusao_arvore(self):
@@ -23,8 +25,20 @@ class ClientesControllers:
             if erro:
                 # Exibe mensagem de erro amigável sem redirecionar
                 flash(erro, 'danger')
-                # Retorna o template de inclusão novamente com os dados do formulário
-                return render_template('inclusaoArvores.html')
+                # Retorna o template de inclusão novamente com os dados do formulário preservados
+                dados_form = {
+                    'latitude': request.form.get('latitude', ''),
+                    'longitude': request.form.get('longitude', ''),
+                    'status': request.form.get('status', 'saudavel'),
+                    'tipo': request.form.get('tipo', 'publico'),
+                    'altura_m': request.form.get('altura_m', ''),
+                    'dap_cm': request.form.get('dap_cm', ''),
+                    'nome_cientifico': request.form.get('nome_cientifico', ''),
+                    'tem_tag': request.form.get('tem_tag') == 'on',
+                    'codigo_tag': request.form.get('codigo_tag', ''),
+                    'data_ultima_vistoria': request.form.get('data_ultima_vistoria', '')
+                }
+                return render_template('inclusaoArvores.html', dados_form=dados_form)
             # Sucesso: redireciona para listagem com mensagem de sucesso
             flash('Árvore cadastrada com sucesso!', 'success')
             return redirect('/arvores')
@@ -35,7 +49,9 @@ class ClientesControllers:
             cliente_dao = Clientes_dao(connection_pool)
             status = request.args.get('status', 'todos')
             erro, resultados = cliente_dao.select_arvores_por_status(status)
-            return render_template('consulta.html', arvores=resultados, status_selecionado=status)
+            if erro:
+                flash(str(erro), 'danger')
+            return render_template('consulta.html', arvores=resultados if not erro else [], status_selecionado=status)
         return view
 
     def exibe_form_inclusao_especie(self):
@@ -50,8 +66,13 @@ class ClientesControllers:
             if erro:
                 # Exibe mensagem de erro amigável sem redirecionar
                 flash(erro, 'danger')
-                # Retorna o template de inclusão novamente com os dados do formulário
-                return render_template('inclusaoEspecies.html')
+                # Retorna o template de inclusão novamente com os dados do formulário preservados
+                dados_form = {
+                    'nome_cientifico': request.form.get('nome_cientifico', ''),
+                    'nome_popular': request.form.get('nome_popular', ''),
+                    'nativa': request.form.get('nativa', '')
+                }
+                return render_template('inclusaoEspecies.html', dados_form=dados_form)
             # Sucesso: redireciona para listagem com mensagem de sucesso
             flash('Espécie cadastrada com sucesso!', 'success')
             return redirect('/inclusaoEspecies')
@@ -63,6 +84,7 @@ class ClientesControllers:
             termo_busca = request.args.get('q', '').strip()
             erro, especies = cliente_dao.select_especies(termo_busca if termo_busca else None)
             if erro:
+                # Retornar erro amigável em JSON
                 return jsonify({'erro': str(erro)}), 500
             return jsonify(especies)
         return view

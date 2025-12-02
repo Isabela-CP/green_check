@@ -167,13 +167,15 @@
 
             <div class="form-group">
                 <label for="nome_cientifico">Nome Científico: <span class="text-danger">*</span></label>
-                <input type="text" class="form-control" id="nome_cientifico" name="nome_cientifico" required>
+                <input type="text" class="form-control" id="nome_cientifico" name="nome_cientifico" required
+                       value="{{ dados_form.nome_cientifico if dados_form else '' }}">
                 <small class="form-text text-muted">Exemplo: Handroanthus impetiginosus</small>
             </div>
 
             <div class="form-group">
                 <label for="nome_popular">Nome Popular:</label>
-                <input type="text" class="form-control" id="nome_popular" name="nome_popular">
+                <input type="text" class="form-control" id="nome_popular" name="nome_popular"
+                       value="{{ dados_form.nome_popular if dados_form else '' }}">
                 <small class="form-text text-muted">Exemplo: Ipê-roxo</small>
             </div>
 
@@ -181,8 +183,8 @@
                 <label for="nativa">É uma espécie nativa? <span class="text-danger">*</span></label>
                 <select id="nativa" name="nativa" class="form-control" required>
                     <option value="">Selecione...</option>
-                    <option value="true">Sim (Nativa)</option>
-                    <option value="false">Não (Exótica)</option>
+                    <option value="true" {% if dados_form and dados_form.nativa == 'true' %}selected{% endif %}>Sim (Nativa)</option>
+                    <option value="false" {% if dados_form and dados_form.nativa == 'false' %}selected{% endif %}>Não (Exótica)</option>
                 </select>
             </div>
 

@@ -85,6 +85,15 @@ CREATE TABLE arvore (
     ultima_vistoria DATE,
     status TEXT,
     CONSTRAINT ck_arvore_status CHECK (status IN ('saudavel', 'doente', 'em risco', 'corte programado', 'cortada')),
+    CONSTRAINT ck_arvore_latitude CHECK (
+        latitude >= -90 AND latitude <= 90 AND
+        LENGTH(REGEXP_REPLACE(REGEXP_REPLACE(REGEXP_REPLACE(REGEXP_REPLACE(CAST(latitude AS TEXT), '\.', '', 'g'), '^-?', '', 'g'), '0+$', '', 'g'), '^0+', '', 'g')) <= 8
+    ),
+    CONSTRAINT ck_arvore_longitude CHECK (
+        longitude >= -180 AND longitude <= 180 AND
+        LENGTH(REGEXP_REPLACE(REGEXP_REPLACE(REGEXP_REPLACE(REGEXP_REPLACE(CAST(longitude AS TEXT), '\.', '', 'g'), '^-?', '', 'g'), '0+$', '', 'g'), '^0+', '', 'g')) <= 8
+    ),
+    CONSTRAINT ck_arvore_contador CHECK (contador >= 1),
     tipo VARCHAR(10) CHECK (tipo IN ('publico', 'privado')),
     altura NUMERIC,
     dap NUMERIC,
@@ -107,7 +116,16 @@ CREATE TABLE vistoria_inicial (
     FOREIGN KEY (latitude, longitude, contador)
         REFERENCES arvore(latitude, longitude, contador),
     CONSTRAINT ck_vistoria_status CHECK (status IN ('inválida', 'ok')),
-    CONSTRAINT ck_vistoria_risco CHECK (risco IN ('baixo', 'medio', 'alto', 'critico'))
+    CONSTRAINT ck_vistoria_risco CHECK (risco IN ('baixo', 'medio', 'alto', 'critico')),
+    CONSTRAINT ck_vistoria_latitude CHECK (
+        latitude >= -90 AND latitude <= 90 AND
+        LENGTH(REGEXP_REPLACE(REGEXP_REPLACE(REGEXP_REPLACE(REGEXP_REPLACE(CAST(latitude AS TEXT), '\.', '', 'g'), '^-?', '', 'g'), '0+$', '', 'g'), '^0+', '', 'g')) <= 8
+    ),
+    CONSTRAINT ck_vistoria_longitude CHECK (
+        longitude >= -180 AND longitude <= 180 AND
+        LENGTH(REGEXP_REPLACE(REGEXP_REPLACE(REGEXP_REPLACE(REGEXP_REPLACE(CAST(longitude AS TEXT), '\.', '', 'g'), '^-?', '', 'g'), '0+$', '', 'g'), '^0+', '', 'g')) <= 8
+    ),
+    CONSTRAINT ck_vistoria_contador CHECK (contador >= 1)
 );
 
 -- manutencao

@@ -169,41 +169,41 @@
 
             <div class="form-group">
                 <label for="latitude">Latitude:</label>
-                <input type="text" class="form-control" id="latitude" name="latitude">
+                <input type="text" class="form-control" id="latitude" name="latitude" value="{{ dados_form.latitude if dados_form else '' }}">
             </div>
 
             <div class="form-group">
                 <label for="longitude">Longitude:</label>
-                <input type="text" class="form-control" id="longitude" name="longitude">
+                <input type="text" class="form-control" id="longitude" name="longitude" value="{{ dados_form.longitude if dados_form else '' }}">
             </div>
 
             <div class="form-group">
                 <label for="status">Status:</label>
                 <select id="status" name="status" class="form-control">
-                    <option value="saudavel">Saudável</option>
-                    <option value="doente">Doente</option>
-                    <option value="em risco">Em Risco</option>
-                    <option value="corte programado">Corte Programado</option>
-                    <option value="cortada">Cortada</option>
+                    <option value="saudavel" {% if dados_form and dados_form.status == 'saudavel' %}selected{% endif %}>Saudável</option>
+                    <option value="doente" {% if dados_form and dados_form.status == 'doente' %}selected{% endif %}>Doente</option>
+                    <option value="em risco" {% if dados_form and dados_form.status == 'em risco' %}selected{% endif %}>Em Risco</option>
+                    <option value="corte programado" {% if dados_form and dados_form.status == 'corte programado' %}selected{% endif %}>Corte Programado</option>
+                    <option value="cortada" {% if dados_form and dados_form.status == 'cortada' %}selected{% endif %}>Cortada</option>
                 </select>
             </div>
 
             <div class="form-group">
                 <label for="tipo">Tipo:</label>
                 <select id="tipo" name="tipo" class="form-control">
-                    <option value="publico">Pública</option>
-                    <option value="privado">Privada</option>
+                    <option value="publico" {% if dados_form and dados_form.tipo == 'publico' %}selected{% endif %}>Pública</option>
+                    <option value="privado" {% if dados_form and dados_form.tipo == 'privado' %}selected{% endif %}>Privada</option>
                 </select>
             </div>
 
             <div class="form-group">
                 <label for="altura_m">Altura (m):</label>
-                <input type="text" class="form-control" id="altura_m" name="altura_m">
+                <input type="text" class="form-control" id="altura_m" name="altura_m" value="{{ dados_form.altura_m if dados_form else '' }}">
             </div>
 
             <div class="form-group">
                 <label for="dap_cm">DAP (cm):</label>
-                <input type="text" class="form-control" id="dap_cm" name="dap_cm">
+                <input type="text" class="form-control" id="dap_cm" name="dap_cm" value="{{ dados_form.dap_cm if dados_form else '' }}">
             </div>
 
             <!-- NOVO CAMPO: NOME CIENTÍFICO COM BUSCA -->
@@ -211,7 +211,8 @@
                 <label for="nome_cientifico">Nome Científico:</label>
                 <div class="input-group">
                     <input type="text" class="form-control" id="nome_cientifico" name="nome_cientifico" 
-                           list="lista_especies" autocomplete="off" placeholder="Digite para buscar...">
+                           list="lista_especies" autocomplete="off" placeholder="Digite para buscar..."
+                           value="{{ dados_form.nome_cientifico if dados_form else '' }}">
                     <div class="input-group-append">
                         <button class="btn btn-outline-secondary" type="button" id="btn_buscar_especie" 
                                 style="background-color: #8BCF8A; border-color: #8BCF8A; color: white;">
@@ -229,19 +230,19 @@
             <!-- CAMPO: POSSUI TAG? -->
             <div class="form-group">
                 <label><strong>Possui TAG?</strong></label><br>
-                <input type="checkbox" id="tem_tag" name="tem_tag">
+                <input type="checkbox" id="tem_tag" name="tem_tag" {% if dados_form and dados_form.tem_tag %}checked{% endif %}>
                 <label for="tem_tag">Sim</label>
             </div>
 
             <!-- CAMPO: CÓDIGO DA TAG -->
             <div class="form-group" id="campo_tag" style="display: none;">
                 <label for="codigo_tag">Código da TAG:</label>
-                <input type="text" class="form-control" id="codigo_tag" name="codigo_tag">
+                <input type="text" class="form-control" id="codigo_tag" name="codigo_tag" value="{{ dados_form.codigo_tag if dados_form else '' }}">
             </div>
 
             <div class="form-group">
                 <label for="data_ultima_vistoria">Data da última vistoria:</label>
-                <input type="date" class="form-control" id="data_ultima_vistoria" name="data_ultima_vistoria">
+                <input type="date" class="form-control" id="data_ultima_vistoria" name="data_ultima_vistoria" value="{{ dados_form.data_ultima_vistoria if dados_form else '' }}">
             </div>
 
             <button type="submit" class="btn btn-success">Cadastrar Árvore</button>
@@ -336,6 +337,14 @@
                 })
                 .catch(erro => {
                     console.error('Erro ao buscar espécies:', erro);
+                    // Exibir mensagem amigável ao usuário
+                    listaResultados.innerHTML = `
+                        <li class="list-group-item text-danger">
+                            <i class="fa-solid fa-exclamation-triangle"></i> 
+                            Não foi possível buscar as espécies. Por favor, tente novamente.
+                        </li>
+                    `;
+                    resultadoBusca.style.display = 'block';
                 });
         }
 
@@ -376,77 +385,30 @@
             }
         });
 
-        document.getElementById("tem_tag").addEventListener("change", function () {
-            const campoTag = document.getElementById("campo_tag");
-            if (this.checked) {
-                campoTag.style.display = "block";
-            } else {
-                campoTag.style.display = "none";
-                document.getElementById("codigo_tag").value = "";
-            }
-        });
+        // Configurar campo TAG ao carregar a página (se houver dados preservados)
+        const temTagCheckbox = document.getElementById("tem_tag");
+        const campoTag = document.getElementById("campo_tag");
+        
+        // Se o checkbox estiver marcado (dados preservados), mostrar o campo
+        if (temTagCheckbox && temTagCheckbox.checked) {
+            campoTag.style.display = "block";
+        }
+        
+        // Adicionar listener para mudanças no checkbox
+        if (temTagCheckbox) {
+            temTagCheckbox.addEventListener("change", function () {
+                if (this.checked) {
+                    campoTag.style.display = "block";
+                } else {
+                    campoTag.style.display = "none";
+                    document.getElementById("codigo_tag").value = "";
+                }
+            });
+        }
 
-        // Validação do formulário baseada nas constraints do esquema
-        document.querySelector("form").addEventListener("submit", function(event) {
-            const latitude = document.getElementById("latitude").value.trim();
-            const longitude = document.getElementById("longitude").value.trim();
-            const tipo = document.getElementById("tipo").value;
-            const altura = document.getElementById("altura_m").value.trim();
-            const dap = document.getElementById("dap_cm").value.trim();
-            const nomeCientifico = document.getElementById("nome_cientifico").value.trim();
-
-            // Validar latitude (obrigatória e numérica)
-            if (!latitude) {
-                event.preventDefault();
-                alert("Latitude é obrigatória.");
-                return;
-            }
-            if (isNaN(latitude) || parseFloat(latitude) < -90 || parseFloat(latitude) > 90) {
-                event.preventDefault();
-                alert("Latitude deve ser um número válido entre -90 e 90.");
-                return;
-            }
-
-            // Validar longitude (obrigatória e numérica)
-            if (!longitude) {
-                event.preventDefault();
-                alert("Longitude é obrigatória.");
-                return;
-            }
-            if (isNaN(longitude) || parseFloat(longitude) < -180 || parseFloat(longitude) > 180) {
-                event.preventDefault();
-                alert("Longitude deve ser um número válido entre -180 e 180.");
-                return;
-            }
-
-            // Validar tipo (deve ser 'publico' ou 'privado')
-            if (tipo !== 'publico' && tipo !== 'privado') {
-                event.preventDefault();
-                alert("Tipo deve ser 'publico' ou 'privado'.");
-                return;
-            }
-
-            // Validar altura se preenchida (deve ser numérica e positiva)
-            if (altura && (isNaN(altura) || parseFloat(altura) < 0)) {
-                event.preventDefault();
-                alert("Altura deve ser um número positivo ou deixe em branco.");
-                return;
-            }
-
-            // Validar DAP se preenchido (deve ser numérico e positivo)
-            if (dap && (isNaN(dap) || parseFloat(dap) < 0)) {
-                event.preventDefault();
-                alert("DAP deve ser um número positivo ou deixe em branco.");
-                return;
-            }
-
-            // Validar nome científico se preenchido (não pode estar vazio se informado)
-            if (nomeCientifico && nomeCientifico.length === 0) {
-                event.preventDefault();
-                alert("Nome científico não pode estar vazio se informado.");
-                return;
-            }
-        });
+        // As validações de latitude e longitude são feitas no backend
+        // As mensagens de erro serão exibidas como flash messages do Flask (mesmo estilo dos outros erros)
+        // Não há necessidade de validação JavaScript, o backend já retorna mensagens amigáveis
     </script>
 
 </body>
