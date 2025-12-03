@@ -3,7 +3,7 @@
 ## Estrutura do Projeto
 
 ```
-green_check_python/
+green_check/
 ├── server.py                 # Arquivo principal para iniciar o servidor
 ├── requirements.txt          # Dependências Python
 ├── Dockerfile                # Configuração da imagem Docker
@@ -15,19 +15,33 @@ green_check_python/
 │   │   └── database.py      # Configuração do banco de dados
 │   └── app/
 │       ├── BD/
-│       │   ├── clientes_dao.py    # DAO para árvores
-│       │   └── usuarios_dao.py    # DAO para usuários
+│       │   ├── arvores_dao.py      # DAO para árvores
+│       │   └── usuarios_dao.py     # DAO para usuários
 │       ├── controllers/
-│       │   ├── clientes_controllers.py
+│       │   ├── auth.py             # Autenticação e autorização
+│       │   ├── arvores_controllers.py
 │       │   └── usuarios_controllers.py
 │       ├── rotas/
 │       │   └── rotas.py
+│       ├── utils/
+│       │   ├── security.py         # Utilitários de segurança
+│       │   ├── generate_password_hash.py
+│       │   └── verificar_senhas.py
 │       └── views/
-│           ├── templates/   # Templates Jinja2
-│           └── css/         # Arquivos CSS
+│           ├── templates/          # Templates Jinja2
+│           │   ├── consulta.html
+│           │   ├── inclusaoArvores.html
+│           │   ├── inclusaoEspecies.html
+│           │   ├── listagemArvores.html
+│           │   └── login.html
+│           └── css/               # Arquivos CSS
+│               └── estilo.css
 └── db/
-    └── init/
-        └── 01_schema.sql    # Schema do banco de dados
+    ├── init/
+    │   ├── 01_esquema.sql    # Schema do banco de dados
+    │   └── 02_dados.sql      # Dados iniciais
+    └── scripts/
+        └── consultas.sql     # Consultas SQL complexas
 ```
 
 ## Instalação
