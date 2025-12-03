@@ -1,4 +1,4 @@
-class Clientes_dao:
+class Arvores_dao:
     def __init__(self, db_pool):
         self._db_pool = db_pool
 
@@ -153,7 +153,7 @@ class Clientes_dao:
                     longitude,
                     contador,
                     dados.get("nome_cientifico"),
-                    dados.get("data_ultima_vistoria") or None,
+                    None,  # ultima_vistoria é definida automaticamente pelo sistema, não pelo usuário
                     dados.get("status"),
                     dados.get("tipo"),
                     dados.get("altura_m") or None,

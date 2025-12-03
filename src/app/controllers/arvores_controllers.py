@@ -1,13 +1,13 @@
-# chamando a classe ClientesDAO
-from src.app.BD.clientes_dao import Clientes_dao
+# chamando a classe ArvoresDAO
+from src.app.BD.arvores_dao import Arvores_dao
 from src.config.database import connection_pool
 from flask import render_template, redirect, request, flash, jsonify
 
-class ClientesControllers:
+class ArvoresControllers:
     def lista_arvore(self):
         def view():
-            cliente_dao = Clientes_dao(connection_pool)
-            erro, resultados = cliente_dao.select_na_tabela_clientes()
+            arvore_dao = Arvores_dao(connection_pool)
+            erro, resultados = arvore_dao.select_na_tabela_clientes()
             if erro:
                 flash(str(erro), 'danger')
             return render_template('listagemArvores.html', arvores=resultados if not erro else [])
@@ -20,8 +20,8 @@ class ClientesControllers:
 
     def insere_nova_arvore(self):
         def view():
-            cliente_dao = Clientes_dao(connection_pool)
-            erro = cliente_dao.inclui_clientes(request.form)
+            arvore_dao = Arvores_dao(connection_pool)
+            erro = arvore_dao.inclui_clientes(request.form)
             if erro:
                 # Exibe mensagem de erro amigável sem redirecionar
                 flash(erro, 'danger')
@@ -35,8 +35,7 @@ class ClientesControllers:
                     'dap_cm': request.form.get('dap_cm', ''),
                     'nome_cientifico': request.form.get('nome_cientifico', ''),
                     'tem_tag': request.form.get('tem_tag') == 'on',
-                    'codigo_tag': request.form.get('codigo_tag', ''),
-                    'data_ultima_vistoria': request.form.get('data_ultima_vistoria', '')
+                    'codigo_tag': request.form.get('codigo_tag', '')
                 }
                 return render_template('inclusaoArvores.html', dados_form=dados_form)
             # Sucesso: redireciona para listagem com mensagem de sucesso
@@ -46,9 +45,9 @@ class ClientesControllers:
 
     def select_arvores_por_status(self):
         def view():
-            cliente_dao = Clientes_dao(connection_pool)
+            arvore_dao = Arvores_dao(connection_pool)
             status = request.args.get('status', 'todos')
-            erro, resultados = cliente_dao.select_arvores_por_status(status)
+            erro, resultados = arvore_dao.select_arvores_por_status(status)
             if erro:
                 flash(str(erro), 'danger')
             return render_template('consulta.html', arvores=resultados if not erro else [], status_selecionado=status)
@@ -61,8 +60,8 @@ class ClientesControllers:
 
     def insere_nova_especie(self):
         def view():
-            cliente_dao = Clientes_dao(connection_pool)
-            erro = cliente_dao.inclui_especie(request.form)
+            arvore_dao = Arvores_dao(connection_pool)
+            erro = arvore_dao.inclui_especie(request.form)
             if erro:
                 # Exibe mensagem de erro amigável sem redirecionar
                 flash(erro, 'danger')
@@ -80,9 +79,9 @@ class ClientesControllers:
 
     def busca_especies(self):
         def view():
-            cliente_dao = Clientes_dao(connection_pool)
+            arvore_dao = Arvores_dao(connection_pool)
             termo_busca = request.args.get('q', '').strip()
-            erro, especies = cliente_dao.select_especies(termo_busca if termo_busca else None)
+            erro, especies = arvore_dao.select_especies(termo_busca if termo_busca else None)
             if erro:
                 # Retornar erro amigável em JSON
                 return jsonify({'erro': str(erro)}), 500
